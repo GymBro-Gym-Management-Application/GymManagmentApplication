@@ -1,4 +1,5 @@
 using GymManagmentApplication.Domain.Enums;
+using GymManagmentApplication.Domain.Entities.Identity;
 
 namespace GymManagmentApplication.Domain.Entities.Core;
 
