@@ -4,6 +4,9 @@ using GymManagmentApplication.Application.Auth;
 using GymManagmentApplication.Application.Auth.Interfaces;
 using GymManagmentApplication.Application.Auth.Services;
 using GymManagmentApplication.Application.Auth.Validators;
+using GymManagmentApplication.Application.Biometric.Interfaces;
+using GymManagmentApplication.Application.Biometric.Services;
+using GymManagmentApplication.Application.Biometric.Validators;
 using GymManagmentApplication.Application.Corporate.Interfaces;
 using GymManagmentApplication.Application.Corporate.Services;
 using GymManagmentApplication.Application.Corporate.Validators;
@@ -16,6 +19,12 @@ using GymManagmentApplication.Application.Member.Validators;
 using GymManagmentApplication.Application.Onboarding.Interfaces;
 using GymManagmentApplication.Application.Onboarding.Services;
 using GymManagmentApplication.Application.Onboarding.Validators;
+using GymManagmentApplication.Application.Roles.Interfaces;
+using GymManagmentApplication.Application.Roles.Services;
+using GymManagmentApplication.Application.Roles.Validators;
+using GymManagmentApplication.Application.SSO.Interfaces;
+using GymManagmentApplication.Application.SSO.Services;
+using GymManagmentApplication.Application.SSO.Validators;
 using GymManagmentApplication.Application.Trainer.Interfaces;
 using GymManagmentApplication.Application.Trainer.Services;
 using GymManagmentApplication.Application.Trainer.Validators;
@@ -83,6 +92,9 @@ builder.Services.AddValidatorsFromAssemblyContaining<CreateMemberValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateLeadValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<StartOnboardingValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateCorporateAccountValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<SsoInitValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<EnrollFaceValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateRoleValidator>();
 
 // Application Services
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -91,6 +103,9 @@ builder.Services.AddScoped<IMemberService, MemberService>();
 builder.Services.AddScoped<ILeadService, LeadService>();
 builder.Services.AddScoped<IOnboardingService, OnboardingService>();
 builder.Services.AddScoped<ICorporateService, CorporateService>();
+builder.Services.AddScoped<ISsoService, SsoService>();
+builder.Services.AddScoped<IBiometricService, BiometricService>();
+builder.Services.AddScoped<IRolesService, RolesService>();
 
 // Infrastructure Repositories
 builder.Services.AddScoped<ITrainerRepository, TrainerRepository>();
