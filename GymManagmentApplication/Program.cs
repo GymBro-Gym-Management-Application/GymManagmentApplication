@@ -1,6 +1,24 @@
 using System.Text;
 using FluentValidation;
 using GymManagmentApplication.Application.Auth;
+using GymManagmentApplication.Application.Exercise.Interfaces;
+using GymManagmentApplication.Application.Exercise.Services;
+using GymManagmentApplication.Application.Exercise.Validators;
+using GymManagmentApplication.Application.Workout.Interfaces;
+using GymManagmentApplication.Application.Workout.Services;
+using GymManagmentApplication.Application.Workout.Validators;
+using GymManagmentApplication.Application.WorkoutPlan.Interfaces;
+using GymManagmentApplication.Application.WorkoutPlan.Services;
+using GymManagmentApplication.Application.WorkoutPlan.Validators;
+using GymManagmentApplication.Application.WorkoutBuilder.Interfaces;
+using GymManagmentApplication.Application.WorkoutBuilder.Services;
+using GymManagmentApplication.Application.WorkoutAutomation.Interfaces;
+using GymManagmentApplication.Application.WorkoutAutomation.Services;
+using GymManagmentApplication.Application.WorkoutAutomation.Validators;
+using GymManagmentApplication.Infrastructure.Repositories.Exercise;
+using GymManagmentApplication.Infrastructure.Repositories.Workout;
+using GymManagmentApplication.Infrastructure.Repositories.WorkoutPlan;
+using GymManagmentApplication.Infrastructure.Repositories.WorkoutAutomation;
 using GymManagmentApplication.Application.Auth.Interfaces;
 using GymManagmentApplication.Application.Auth.Services;
 using GymManagmentApplication.Application.Auth.Validators;
@@ -33,11 +51,17 @@ using GymManagmentApplication.Infrastructure.Repositories.Corporate;
 using GymManagmentApplication.Infrastructure.Repositories.Lead;
 using GymManagmentApplication.Infrastructure.Repositories.Member;
 using GymManagmentApplication.Infrastructure.Repositories.Onboarding;
+using GymManagmentApplication.Infrastructure.Data;
 using GymManagmentApplication.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Database
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // JWT Settings
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
@@ -95,6 +119,10 @@ builder.Services.AddValidatorsFromAssemblyContaining<CreateCorporateAccountValid
 builder.Services.AddValidatorsFromAssemblyContaining<SsoInitValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<EnrollFaceValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateRoleValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateExerciseValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateWorkoutValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreatePlanValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateAutomationRuleValidator>();
 
 // Application Services
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -106,6 +134,11 @@ builder.Services.AddScoped<ICorporateService, CorporateService>();
 builder.Services.AddScoped<ISsoService, SsoService>();
 builder.Services.AddScoped<IBiometricService, BiometricService>();
 builder.Services.AddScoped<IRolesService, RolesService>();
+builder.Services.AddScoped<IExerciseService, ExerciseService>();
+builder.Services.AddScoped<IWorkoutService, WorkoutService>();
+builder.Services.AddScoped<IWorkoutPlanService, WorkoutPlanService>();
+builder.Services.AddScoped<IWorkoutBuilderService, WorkoutBuilderService>();
+builder.Services.AddScoped<IWorkoutAutomationService, WorkoutAutomationService>();
 
 // Infrastructure Repositories
 builder.Services.AddScoped<ITrainerRepository, TrainerRepository>();
@@ -113,6 +146,10 @@ builder.Services.AddScoped<IMemberRepository, MemberRepository>();
 builder.Services.AddScoped<ILeadRepository, LeadRepository>();
 builder.Services.AddScoped<IOnboardingRepository, OnboardingRepository>();
 builder.Services.AddScoped<ICorporateRepository, CorporateRepository>();
+builder.Services.AddScoped<IExerciseRepository, ExerciseRepository>();
+builder.Services.AddScoped<IWorkoutRepository, WorkoutRepository>();
+builder.Services.AddScoped<IWorkoutPlanRepository, WorkoutPlanRepository>();
+builder.Services.AddScoped<IWorkoutAutomationRepository, WorkoutAutomationRepository>();
 
 var app = builder.Build();
 
