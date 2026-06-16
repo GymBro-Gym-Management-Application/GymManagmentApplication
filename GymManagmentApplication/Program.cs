@@ -33,6 +33,7 @@ using GymManagmentApplication.Infrastructure.Repositories.Corporate;
 using GymManagmentApplication.Infrastructure.Repositories.Lead;
 using GymManagmentApplication.Infrastructure.Repositories.Member;
 using GymManagmentApplication.Infrastructure.Repositories.Onboarding;
+using GymManagmentApplication.Infrastructure.Data;
 using GymManagmentApplication.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -95,6 +96,15 @@ builder.Services.AddValidatorsFromAssemblyContaining<CreateCorporateAccountValid
 builder.Services.AddValidatorsFromAssemblyContaining<SsoInitValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<EnrollFaceValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateRoleValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateExerciseValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateWorkoutValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreatePlanValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateAutomationRuleValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateMembershipPlanValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateSubscriptionValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<ChargePaymentValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateInvoiceValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreatePricingRuleValidator>();
 
 // Application Services
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -113,6 +123,18 @@ builder.Services.AddScoped<IMemberRepository, MemberRepository>();
 builder.Services.AddScoped<ILeadRepository, LeadRepository>();
 builder.Services.AddScoped<IOnboardingRepository, OnboardingRepository>();
 builder.Services.AddScoped<ICorporateRepository, CorporateRepository>();
+
+// Membership & Billing
+builder.Services.AddScoped<IMembershipPlanService, MembershipPlanService>();
+builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IInvoiceService, InvoiceService>();
+builder.Services.AddScoped<IPricingService, PricingService>();
+builder.Services.AddScoped<IMembershipPlanRepository, MembershipPlanRepository>();
+builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+builder.Services.AddScoped<IInvoiceRepository, InvoiceRepository>();
+builder.Services.AddScoped<IPricingRepository, PricingRepository>();
 
 var app = builder.Build();
 
