@@ -245,7 +245,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
         modelBuilder.Entity<User>()
             .HasOne(u => u.Role)
-            .WithMany()
+            .WithMany(r => r.Users)
             .HasForeignKey(u => u.RoleId)
             .OnDelete(DeleteBehavior.Restrict);
 
@@ -284,6 +284,85 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<Rating>().HasOne(r => r.Tenant).WithMany().HasForeignKey(r => r.TenantId).OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<SocialPost>().HasOne(s => s.Tenant).WithMany().HasForeignKey(s => s.TenantId).OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<MediaLibrary>().HasOne(m => m.Tenant).WithMany().HasForeignKey(m => m.TenantId).OnDelete(DeleteBehavior.Restrict);
+
+        // Fix cascade on PosOrderItems
+        modelBuilder.Entity<PosOrderItem>()
+            .HasOne(p => p.Order)
+            .WithMany(o => o.Items)
+            .HasForeignKey(p => p.OrderId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<PosOrderItem>()
+            .HasOne(p => p.Product)
+            .WithMany()
+            .HasForeignKey(p => p.ProductId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Decimal precision
+        modelBuilder.Entity<MlPrediction>().Property(e => e.Confidence).HasPrecision(18, 6);
+        modelBuilder.Entity<MlPrediction>().Property(e => e.Score).HasPrecision(18, 6);
+        modelBuilder.Entity<PoseLog>().Property(e => e.Score).HasPrecision(18, 6);
+        modelBuilder.Entity<AnalyticsDaily>().Property(e => e.Revenue).HasPrecision(18, 2);
+        modelBuilder.Entity<TrainerAnalyticsDaily>().Property(e => e.AvgRating).HasPrecision(10, 4);
+        modelBuilder.Entity<TrainerAnalyticsDaily>().Property(e => e.RevenueGenerated).HasPrecision(18, 2);
+        modelBuilder.Entity<Coupon>().Property(e => e.Value).HasPrecision(18, 2);
+        modelBuilder.Entity<Coupon>().Property(e => e.MinOrder).HasPrecision(18, 2);
+        modelBuilder.Entity<Coupon>().Property(e => e.MaxDiscount).HasPrecision(18, 2);
+        modelBuilder.Entity<CouponRedemption>().Property(e => e.DiscountApplied).HasPrecision(18, 2);
+        modelBuilder.Entity<Invoice>().Property(e => e.Subtotal).HasPrecision(18, 2);
+        modelBuilder.Entity<Invoice>().Property(e => e.Tax).HasPrecision(18, 2);
+        modelBuilder.Entity<Invoice>().Property(e => e.Discount).HasPrecision(18, 2);
+        modelBuilder.Entity<Invoice>().Property(e => e.Total).HasPrecision(18, 2);
+        modelBuilder.Entity<Payment>().Property(e => e.Amount).HasPrecision(18, 2);
+        modelBuilder.Entity<Lead>().Property(e => e.ConversionProb).HasPrecision(10, 4);
+        modelBuilder.Entity<CommunicationLog>().Property(e => e.Cost).HasPrecision(18, 6);
+        modelBuilder.Entity<Branch>().Property(e => e.Lat).HasPrecision(10, 7);
+        modelBuilder.Entity<Branch>().Property(e => e.Lng).HasPrecision(10, 7);
+        modelBuilder.Entity<AccessEvent>().Property(e => e.Confidence).HasPrecision(10, 4);
+        modelBuilder.Entity<EquipmentMaintenanceLog>().Property(e => e.Cost).HasPrecision(18, 2);
+        modelBuilder.Entity<Challenge>().Property(e => e.TargetValue).HasPrecision(18, 4);
+        modelBuilder.Entity<ChallengeParticipant>().Property(e => e.Progress).HasPrecision(18, 4);
+        modelBuilder.Entity<PayrollConfig>().Property(e => e.BaseSalary).HasPrecision(18, 2);
+        modelBuilder.Entity<PayrollSlip>().Property(e => e.BaseSalary).HasPrecision(18, 2);
+        modelBuilder.Entity<PayrollSlip>().Property(e => e.Bonuses).HasPrecision(18, 2);
+        modelBuilder.Entity<PayrollSlip>().Property(e => e.Commission).HasPrecision(18, 2);
+        modelBuilder.Entity<PayrollSlip>().Property(e => e.Deductions).HasPrecision(18, 2);
+        modelBuilder.Entity<PayrollSlip>().Property(e => e.NetPay).HasPrecision(18, 2);
+        modelBuilder.Entity<ClientGoal>().Property(e => e.TargetValue).HasPrecision(18, 4);
+        modelBuilder.Entity<ClientGoal>().Property(e => e.CurrentValue).HasPrecision(18, 4);
+        modelBuilder.Entity<ClientProfile>().Property(e => e.WeightKg).HasPrecision(10, 3);
+        modelBuilder.Entity<ClientProfile>().Property(e => e.HeightCm).HasPrecision(10, 3);
+        modelBuilder.Entity<ClientProfile>().Property(e => e.BodyFatPct).HasPrecision(10, 3);
+        modelBuilder.Entity<ClientProfile>().Property(e => e.MuscleMassKg).HasPrecision(10, 3);
+        modelBuilder.Entity<HealthMetric>().Property(e => e.WeightKg).HasPrecision(10, 3);
+        modelBuilder.Entity<HealthMetric>().Property(e => e.BodyFatPct).HasPrecision(10, 3);
+        modelBuilder.Entity<HealthMetric>().Property(e => e.Bmi).HasPrecision(10, 4);
+        modelBuilder.Entity<HealthMetric>().Property(e => e.SleepHours).HasPrecision(10, 2);
+        modelBuilder.Entity<MembershipPlan>().Property(e => e.Price).HasPrecision(18, 2);
+        modelBuilder.Entity<FoodItem>().Property(e => e.ServingG).HasPrecision(10, 3);
+        modelBuilder.Entity<FoodItem>().Property(e => e.ProteinG).HasPrecision(10, 3);
+        modelBuilder.Entity<FoodItem>().Property(e => e.CarbsG).HasPrecision(10, 3);
+        modelBuilder.Entity<FoodItem>().Property(e => e.FatG).HasPrecision(10, 3);
+        modelBuilder.Entity<FoodItem>().Property(e => e.FiberG).HasPrecision(10, 3);
+        modelBuilder.Entity<NutritionLog>().Property(e => e.QuantityG).HasPrecision(10, 3);
+        modelBuilder.Entity<PosOrder>().Property(e => e.Subtotal).HasPrecision(18, 2);
+        modelBuilder.Entity<PosOrder>().Property(e => e.Tax).HasPrecision(18, 2);
+        modelBuilder.Entity<PosOrder>().Property(e => e.Discount).HasPrecision(18, 2);
+        modelBuilder.Entity<PosOrder>().Property(e => e.Total).HasPrecision(18, 2);
+        modelBuilder.Entity<PosOrderItem>().Property(e => e.UnitPrice).HasPrecision(18, 2);
+        modelBuilder.Entity<PosOrderItem>().Property(e => e.TaxAmount).HasPrecision(18, 2);
+        modelBuilder.Entity<PosOrderItem>().Property(e => e.LineTotal).HasPrecision(18, 2);
+        modelBuilder.Entity<PosProduct>().Property(e => e.Price).HasPrecision(18, 2);
+        modelBuilder.Entity<PosProduct>().Property(e => e.Cost).HasPrecision(18, 2);
+        modelBuilder.Entity<PosProduct>().Property(e => e.TaxRate).HasPrecision(10, 4);
+        modelBuilder.Entity<ClientAssessment>().Property(e => e.Score).HasPrecision(10, 4);
+        modelBuilder.Entity<PricingRule>().Property(e => e.PriceModifier).HasPrecision(18, 4);
+        modelBuilder.Entity<PtSession>().Property(e => e.Price).HasPrecision(18, 2);
+        modelBuilder.Entity<PtSessionType>().Property(e => e.Price).HasPrecision(18, 2);
+        modelBuilder.Entity<TrainerProfile>().Property(e => e.Rating).HasPrecision(10, 4);
+        modelBuilder.Entity<WorkoutLog>().Property(e => e.Score).HasPrecision(10, 4);
+        modelBuilder.Entity<WorkoutLogSet>().Property(e => e.WeightKg).HasPrecision(10, 3);
+        modelBuilder.Entity<WorkoutLogSet>().Property(e => e.DistanceM).HasPrecision(10, 3);
 
         // Fix cascade paths - entities without Tenant nav prop (use shadow FK)
         var noNavTenantEntities = new[]

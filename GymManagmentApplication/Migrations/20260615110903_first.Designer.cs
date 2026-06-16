@@ -4,6 +4,7 @@ using GymManagmentApplication.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GymManagmentApplication.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260615110903_first")]
+    partial class first
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -98,8 +101,7 @@ namespace GymManagmentApplication.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<decimal>("Id"));
 
                     b.Property<decimal?>("Confidence")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("decimal(18,6)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("EntityId")
                         .HasColumnType("decimal(20,0)");
@@ -122,8 +124,7 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<decimal>("Score")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("decimal(18,6)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("TenantId")
                         .HasColumnType("decimal(20,0)");
@@ -159,8 +160,7 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("decimal(20,0)");
 
                     b.Property<decimal?>("Score")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("decimal(18,6)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal?>("TenantId")
                         .HasColumnType("decimal(20,0)");
@@ -212,7 +212,6 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("date");
 
                     b.Property<decimal>("Revenue")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("TenantId")
@@ -243,8 +242,7 @@ namespace GymManagmentApplication.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<decimal>("Id"));
 
                     b.Property<decimal?>("AvgRating")
-                        .HasPrecision(10, 4)
-                        .HasColumnType("decimal(10,4)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("ClientsTrained")
                         .HasColumnType("int");
@@ -253,7 +251,6 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("date");
 
                     b.Property<decimal>("RevenueGenerated")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("SessionsDone")
@@ -419,14 +416,12 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("bit");
 
                     b.Property<decimal?>("MaxDiscount")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<long?>("MaxUses")
                         .HasColumnType("bigint");
 
                     b.Property<decimal>("MinOrder")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<byte>("PerUserLimit")
@@ -451,7 +446,6 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<decimal>("Value")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
@@ -473,7 +467,6 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("decimal(20,0)");
 
                     b.Property<decimal>("DiscountApplied")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal?>("InvoiceId")
@@ -517,7 +510,6 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Discount")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateOnly?>("DueDate")
@@ -540,18 +532,15 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("Subtotal")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("Tax")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("TenantId")
                         .HasColumnType("decimal(20,0)");
 
                     b.Property<decimal>("Total")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -578,7 +567,6 @@ namespace GymManagmentApplication.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<decimal>("Id"));
 
                     b.Property<decimal>("Amount")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -673,8 +661,7 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("decimal(20,0)");
 
                     b.Property<decimal?>("ConversionProb")
-                        .HasPrecision(10, 4)
-                        .HasColumnType("decimal(10,4)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -926,8 +913,7 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal?>("Cost")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("decimal(18,6)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -1254,12 +1240,10 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal?>("Lat")
-                        .HasPrecision(10, 7)
-                        .HasColumnType("decimal(10,7)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal?>("Lng")
-                        .HasPrecision(10, 7)
-                        .HasColumnType("decimal(10,7)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("LogoUrl")
                         .HasColumnType("nvarchar(max)");
@@ -1450,8 +1434,7 @@ namespace GymManagmentApplication.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<decimal>("Id"));
 
                     b.Property<decimal?>("Confidence")
-                        .HasPrecision(10, 4)
-                        .HasColumnType("decimal(10,4)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -1526,7 +1509,6 @@ namespace GymManagmentApplication.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<decimal>("Id"));
 
                     b.Property<decimal?>("Cost")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -1771,8 +1753,7 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal?>("TargetValue")
-                        .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("TenantId")
                         .HasColumnType("decimal(20,0)");
@@ -1806,8 +1787,7 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<decimal>("Progress")
-                        .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int?>("Rank")
                         .HasColumnType("int");
@@ -1869,7 +1849,6 @@ namespace GymManagmentApplication.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<decimal>("Id"));
 
                     b.Property<decimal>("BaseSalary")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("CommissionRules")
@@ -1945,18 +1924,15 @@ namespace GymManagmentApplication.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<decimal>("Id"));
 
                     b.Property<decimal>("BaseSalary")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("Bonuses")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Breakdown")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Commission")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -1967,11 +1943,9 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Deductions")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("NetPay")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime?>("PaidAt")
@@ -2015,8 +1989,7 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<decimal>("CurrentValue")
-                        .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
@@ -2028,8 +2001,7 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("date");
 
                     b.Property<decimal?>("TargetValue")
-                        .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal?>("TenantId")
                         .HasColumnType("decimal(20,0)");
@@ -2068,8 +2040,7 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal?>("BodyFatPct")
-                        .HasPrecision(10, 3)
-                        .HasColumnType("decimal(10,3)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -2087,12 +2058,10 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal?>("HeightCm")
-                        .HasPrecision(10, 3)
-                        .HasColumnType("decimal(10,3)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal?>("MuscleMassKg")
-                        .HasPrecision(10, 3)
-                        .HasColumnType("decimal(10,3)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal?>("TenantId")
                         .HasColumnType("decimal(20,0)");
@@ -2104,8 +2073,7 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("decimal(20,0)");
 
                     b.Property<decimal?>("WeightKg")
-                        .HasPrecision(10, 3)
-                        .HasColumnType("decimal(10,3)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
@@ -2202,12 +2170,10 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal?>("Bmi")
-                        .HasPrecision(10, 4)
-                        .HasColumnType("decimal(10,4)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal?>("BodyFatPct")
-                        .HasPrecision(10, 3)
-                        .HasColumnType("decimal(10,3)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int?>("CaloriesBurned")
                         .HasColumnType("int");
@@ -2237,8 +2203,7 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal?>("SleepHours")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("decimal(10,2)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Source")
                         .HasColumnType("int");
@@ -2253,8 +2218,7 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("decimal(20,0)");
 
                     b.Property<decimal?>("WeightKg")
-                        .HasPrecision(10, 3)
-                        .HasColumnType("decimal(10,3)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
@@ -2599,6 +2563,9 @@ namespace GymManagmentApplication.Migrations
                     b.Property<decimal>("RoleId")
                         .HasColumnType("decimal(20,0)");
 
+                    b.Property<decimal?>("RoleId1")
+                        .HasColumnType("decimal(20,0)");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -2620,6 +2587,8 @@ namespace GymManagmentApplication.Migrations
                         .IsUnique();
 
                     b.HasIndex("RoleId");
+
+                    b.HasIndex("RoleId1");
 
                     b.HasIndex("TenantId");
 
@@ -2812,7 +2781,6 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Price")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("SortOrder")
@@ -2925,28 +2893,23 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal?>("CarbsG")
-                        .HasPrecision(10, 3)
-                        .HasColumnType("decimal(10,3)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal?>("FatG")
-                        .HasPrecision(10, 3)
-                        .HasColumnType("decimal(10,3)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal?>("FiberG")
-                        .HasPrecision(10, 3)
-                        .HasColumnType("decimal(10,3)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal?>("ProteinG")
-                        .HasPrecision(10, 3)
-                        .HasColumnType("decimal(10,3)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal?>("ServingG")
-                        .HasPrecision(10, 3)
-                        .HasColumnType("decimal(10,3)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal?>("TenantId")
                         .HasColumnType("decimal(20,0)");
@@ -2992,8 +2955,7 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal?>("QuantityG")
-                        .HasPrecision(10, 3)
-                        .HasColumnType("decimal(10,3)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal?>("TenantId")
                         .HasColumnType("decimal(20,0)");
@@ -3026,7 +2988,6 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<decimal>("Discount")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("OrderNo")
@@ -3043,18 +3004,15 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("Subtotal")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("Tax")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("TenantId")
                         .HasColumnType("decimal(20,0)");
 
                     b.Property<decimal>("Total")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal?>("UserId")
@@ -3076,13 +3034,9 @@ namespace GymManagmentApplication.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<decimal>("Id"));
 
                     b.Property<decimal>("LineTotal")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("OrderId")
-                        .HasColumnType("decimal(20,0)");
-
-                    b.Property<decimal?>("PosProductId")
                         .HasColumnType("decimal(20,0)");
 
                     b.Property<decimal>("ProductId")
@@ -3092,18 +3046,14 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("TaxAmount")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("UnitPrice")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("OrderId");
-
-                    b.HasIndex("PosProductId");
 
                     b.HasIndex("ProductId");
 
@@ -3125,7 +3075,6 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal?>("Cost")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -3142,7 +3091,6 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Price")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Sku")
@@ -3152,8 +3100,7 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("TaxRate")
-                        .HasPrecision(10, 4)
-                        .HasColumnType("decimal(10,4)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("TenantId")
                         .HasColumnType("decimal(20,0)");
@@ -3327,8 +3274,7 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal?>("Score")
-                        .HasPrecision(10, 4)
-                        .HasColumnType("decimal(10,4)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("TemplateId")
                         .HasColumnType("decimal(20,0)");
@@ -3717,8 +3663,7 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("PriceModifier")
-                        .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<byte>("Priority")
                         .HasColumnType("tinyint");
@@ -4520,7 +4465,6 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal?>("Price")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<byte?>("Rating")
@@ -4586,7 +4530,6 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Price")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("TenantId")
@@ -4758,8 +4701,7 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal?>("Rating")
-                        .HasPrecision(10, 4)
-                        .HasColumnType("decimal(10,4)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Salary")
                         .HasColumnType("nvarchar(max)");
@@ -5062,8 +5004,7 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal?>("Score")
-                        .HasPrecision(10, 4)
-                        .HasColumnType("decimal(10,4)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("StartedAt")
                         .HasColumnType("datetime2");
@@ -5091,8 +5032,7 @@ namespace GymManagmentApplication.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<decimal>("Id"));
 
                     b.Property<decimal?>("DistanceM")
-                        .HasPrecision(10, 3)
-                        .HasColumnType("decimal(10,3)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<short?>("DurationSec")
                         .HasColumnType("smallint");
@@ -5116,8 +5056,7 @@ namespace GymManagmentApplication.Migrations
                         .HasColumnType("tinyint");
 
                     b.Property<decimal?>("WeightKg")
-                        .HasPrecision(10, 3)
-                        .HasColumnType("decimal(10,3)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
@@ -6309,10 +6248,14 @@ namespace GymManagmentApplication.Migrations
                         .HasForeignKey("BranchId");
 
                     b.HasOne("GymManagmentApplication.Domain.Entities.Identity.Role", "Role")
-                        .WithMany("Users")
+                        .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("GymManagmentApplication.Domain.Entities.Identity.Role", null)
+                        .WithMany("Users")
+                        .HasForeignKey("RoleId1");
 
                     b.HasOne("GymManagmentApplication.Domain.Entities.Core.Tenant", "Tenant")
                         .WithMany("Users")
@@ -6474,17 +6417,13 @@ namespace GymManagmentApplication.Migrations
                     b.HasOne("GymManagmentApplication.Domain.Entities.POS.PosOrder", "Order")
                         .WithMany("Items")
                         .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("GymManagmentApplication.Domain.Entities.POS.PosProduct", null)
-                        .WithMany("OrderItems")
-                        .HasForeignKey("PosProductId");
-
                     b.HasOne("GymManagmentApplication.Domain.Entities.POS.PosProduct", "Product")
-                        .WithMany()
+                        .WithMany("OrderItems")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Order");
