@@ -2,6 +2,7 @@ using GymManagmentApplication.Domain.Entities.Identity;
 using GymManagmentApplication.Domain.Entities.Training;
 using GymManagmentApplication.Domain.Enums;
 using GymManagmentApplication.Infrastructure;
+using GymManagmentApplication.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace GymManagmentApplication.Infrastructure.Repositories;

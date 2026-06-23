@@ -1,3 +1,4 @@
+using GymManagmentApplication.Infrastructure.Data;
 using GymManagmentApplication.Infrastructure.Repositories.Branch;
 using Microsoft.EntityFrameworkCore;
 

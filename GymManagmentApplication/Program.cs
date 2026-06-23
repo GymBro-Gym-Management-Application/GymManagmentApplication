@@ -54,7 +54,6 @@ using GymManagmentApplication.Application.Trainer.Services;
 using GymManagmentApplication.Application.Trainer.Validators;
 using GymManagmentApplication.Infrastructure.Repositories.Branch;
 using GymManagmentApplication.Infrastructure.Repositories.Tenant;
-using GymManagmentApplication.Infrastructure;
 using GymManagmentApplication.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using GymManagmentApplication.Infrastructure.Repositories.Corporate;
@@ -64,14 +63,13 @@ using GymManagmentApplication.Infrastructure.Repositories.Onboarding;
 using GymManagmentApplication.Infrastructure.Data;
 using GymManagmentApplication.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Database
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // JWT Settings
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
@@ -93,16 +91,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ClockSkew = TimeSpan.Zero
         };
     });
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll", policy =>
-        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
-});
-
-// Database
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
@@ -137,13 +125,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAllOrgin",
-        policy =>
-        {
-            policy.WithOrigins("AllowAllOrgin") // frontend URL
-                  .AllowAnyHeader()
-                  .AllowAnyMethod();
-        });
+    options.AddPolicy("AllowAll", policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 });
 // Validators
 builder.Services.AddValidatorsFromAssemblyContaining<LoginValidator>();
@@ -207,7 +189,6 @@ if (app.Environment.IsDevelopment())
 app.UseCors("AllowAll");
 app.UseHttpsRedirection();
 app.UseAuthentication();
-app.UseCors("AllowAllOrgin");
 app.UseAuthorization();
 app.MapControllers();
 

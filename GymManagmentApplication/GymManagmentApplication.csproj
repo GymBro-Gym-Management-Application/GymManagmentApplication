@@ -4,6 +4,8 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>404a745a-15aa-4f09-b7dd-b4f40c49f229</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,13 +15,14 @@
 
     <!-- Authentication -->
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.0" />
 
     <!-- Swagger -->
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.9.0" />
 
     <!-- ORM -->
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

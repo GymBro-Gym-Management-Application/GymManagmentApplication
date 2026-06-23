@@ -182,7 +182,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     {
         configurationBuilder.Properties<JsonDocument>()
             .HaveConversion<JsonDocumentConverter>()
-            .HaveColumnType("nvarchar(max)");
+            .HaveColumnType("jsonb");
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -274,8 +274,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<Notification>().HasOne(n => n.Tenant).WithMany().HasForeignKey(n => n.TenantId).OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<PayrollConfig>().HasOne(p => p.Tenant).WithMany().HasForeignKey(p => p.TenantId).OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<DietPlan>().HasOne(d => d.Tenant).WithMany().HasForeignKey(d => d.TenantId).OnDelete(DeleteBehavior.Restrict);
-        modelBuilder.Entity<TrainerProfile>().HasOne(t => t.Tenant).WithMany().HasForeignKey(t => t.TenantId).OnDelete(DeleteBehavior.Restrict);
-        modelBuilder.Entity<TrainerClientAssignment>().HasOne(t => t.Tenant).WithMany().HasForeignKey(t => t.TenantId).OnDelete(DeleteBehavior.Restrict);
+        //modelBuilder.Entity<TrainerProfile>().HasOne(t => t.Tenant).WithMany().HasForeignKey(t => t.TenantId).OnDelete(DeleteBehavior.Restrict);
+        //modelBuilder.Entity<TrainerClientAssignment>().HasOne(t => t.Tenant).WithMany().HasForeignKey(t => t.TenantId).OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<WorkoutTemplate>().HasOne(w => w.Tenant).WithMany().HasForeignKey(w => w.TenantId).OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<WorkoutPlan>().HasOne(w => w.Tenant).WithMany().HasForeignKey(w => w.TenantId).OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<WorkoutAutomationRule>().HasOne(w => w.Tenant).WithMany().HasForeignKey(w => w.TenantId).OnDelete(DeleteBehavior.Restrict);
@@ -391,5 +391,7 @@ public class JsonDocumentConverter : Microsoft.EntityFrameworkCore.Storage.Value
 {
     public JsonDocumentConverter() : base(
         v => v.RootElement.GetRawText(),
-        v => JsonDocument.Parse(v)) { }
+        v => Parse(v)) { }
+
+    private static JsonDocument Parse(string v) => JsonDocument.Parse(v);
 }
