@@ -3,8 +3,8 @@ namespace GymManagmentApplication.Application.Trainer.Responses;
 public class TrainerResponse
 {
     public ulong Id { get; set; }
-    public ulong UserId { get; set; }
-    public ulong TenantId { get; set; }
+    public ulong? UserId { get; set; }
+    public ulong? BranchId { get; set; }
 
     public string? TrainerCode { get; set; }
     public string? DisplayName { get; set; }

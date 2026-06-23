@@ -4,8 +4,8 @@ namespace GymManagmentApplication.Domain.Entities.Training;
 
 public class TrainerProfile : BaseEntity
 {
-    public ulong UserId { get; set; }
-    public ulong TenantId { get; set; }
+    public ulong? UserId { get; set; }
+    public ulong? BranchId { get; set; }
 
     // Basic Info
     public string? TrainerCode { get; set; }
@@ -54,8 +54,8 @@ public class TrainerProfile : BaseEntity
     public bool IsAvailable { get; set; } = true;
     public string? Notes { get; set; }
 
-    public Identity.User User { get; set; } = default!;
-    public Core.Tenant Tenant { get; set; } = default!;
+    public Identity.User? User { get; set; }
+    public Core.Branch? Branch { get; set; }
     public ICollection<TrainerClientAssignment> ClientAssignments { get; set; } = [];
     public ICollection<TrainerAvailabilitySlot> AvailabilitySlots { get; set; } = [];
     public ICollection<TrainerTimeOff> TimeOffs { get; set; } = [];

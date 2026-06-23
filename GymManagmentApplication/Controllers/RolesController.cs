@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace GymManagmentApplication.Controllers;
 
 [ApiController]
-[AuthorizeRoles("admin")]
+//[AuthorizeRoles("admin")]
 public class RolesController(
     IRolesService service,
     IValidator<CreateRoleRequest> createValidator,
