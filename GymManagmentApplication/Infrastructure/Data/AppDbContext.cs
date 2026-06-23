@@ -189,6 +189,14 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     {
         base.OnModelCreating(modelBuilder);
 
+        // Auto-increment for ulong PKs (PostgreSQL doesn't infer this for ulong)
+        foreach (var entity in modelBuilder.Model.GetEntityTypes())
+        {
+            var pk = entity.FindProperty("Id");
+            if (pk != null && pk.ClrType == typeof(ulong))
+                pk.ValueGenerated = Microsoft.EntityFrameworkCore.Metadata.ValueGenerated.OnAdd;
+        }
+
         // Composite keys
         modelBuilder.Entity<ExerciseMuscle>().HasKey(e => new { e.ExerciseId, e.MuscleId });
         modelBuilder.Entity<ExerciseEquipment>().HasKey(e => new { e.ExerciseId, e.EquipmentId });
