@@ -25,6 +25,7 @@ public class TenantController(
         return result is null
             ? NotFound(ApiResponse<object>.Fail($"Tenant {id} not found."))
             : Ok(ApiResponse<object>.Ok(result));
+
     }
 
     [HttpPost]
