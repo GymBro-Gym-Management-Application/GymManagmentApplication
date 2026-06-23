@@ -1,9 +1,10 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
-COPY ["GymManagmentApplication.csproj", "./"]
-RUN dotnet restore "./GymManagmentApplication.csproj"
+COPY ["GymManagmentApplication/GymManagmentApplication.csproj", "GymManagmentApplication/"]
+RUN dotnet restore "GymManagmentApplication/GymManagmentApplication.csproj"
 COPY . .
-RUN dotnet publish "./GymManagmentApplication.csproj" -c Release -o /app/publish /p:UseAppHost=false
+WORKDIR /src/GymManagmentApplication
+RUN dotnet publish "GymManagmentApplication.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
 WORKDIR /app
