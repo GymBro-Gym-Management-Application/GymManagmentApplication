@@ -182,13 +182,13 @@ builder.Services.AddScoped<IWorkoutAutomationRepository, WorkoutAutomationReposi
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionMiddleware>();
-app.UseMiddleware<JwtMiddleware>();
 
 app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseCors("AllowAll");
 app.UseAuthentication();
+app.UseMiddleware<JwtMiddleware>();
 app.UseAuthorization();
 app.MapControllers();
 
