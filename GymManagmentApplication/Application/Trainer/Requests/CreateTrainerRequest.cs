@@ -2,11 +2,10 @@ namespace GymManagmentApplication.Application.Trainer.Requests;
 
 public class CreateTrainerRequest
 {
-    public ulong UserId { get; set; }
-    public ulong TenantId { get; set; }
+    public ulong BranchId { get; set; }
 
     // Basic Info
-    public string? TrainerCode { get; set; }
+    public required string TrainerCode { get; set; }
     public string? DisplayName { get; set; }
     public string? ProfileImage { get; set; }
     public string? Bio { get; set; }

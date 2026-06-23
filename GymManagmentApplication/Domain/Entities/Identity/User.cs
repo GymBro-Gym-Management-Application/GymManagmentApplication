@@ -8,12 +8,12 @@ public class User : BaseEntity
     public ulong TenantId { get; set; }
     public ulong? BranchId { get; set; }
     public ulong RoleId { get; set; }
-    public string Uuid { get; set; } = default!;
-    public string Email { get; set; } = default!;
+    public string? Uuid { get; set; }
+    public string? Email { get; set; }
     public string? Phone { get; set; }
-    public string PasswordHash { get; set; } = default!;
-    public string FirstName { get; set; } = default!;
-    public string LastName { get; set; } = default!;
+    public string? PasswordHash { get; set; }
+    public string? FirstName { get; set; }
+    public string? LastName { get; set; }
     public string? AvatarUrl { get; set; }
     public UserGender? Gender { get; set; }
     public DateOnly? Dob { get; set; }

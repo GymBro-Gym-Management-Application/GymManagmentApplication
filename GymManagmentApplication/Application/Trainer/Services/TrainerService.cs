@@ -1,8 +1,11 @@
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using GymManagmentApplication.Application.Common;
 using GymManagmentApplication.Application.Trainer.Interfaces;
 using GymManagmentApplication.Application.Trainer.Requests;
 using GymManagmentApplication.Application.Trainer.Responses;
+using GymManagmentApplication.Domain.Entities.Identity;
 using GymManagmentApplication.Domain.Entities.Training;
 using GymManagmentApplication.Domain.Enums;
 using GymManagmentApplication.Infrastructure.Repositories;
@@ -27,10 +30,24 @@ public class TrainerService(ITrainerRepository repository) : ITrainerService
 
     public async Task<TrainerResponse> CreateAsync(CreateTrainerRequest request)
     {
+        var user = new User
+        {
+            Uuid = Guid.NewGuid().ToString(),
+            TenantId = request.BranchId,
+            Email = request.Email,
+            Phone = request.Phone,
+            FirstName = request.DisplayName,
+            LastName = null,
+            PasswordHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes("123"))),
+            Status = UserStatus.Active,
+            RoleId = 2
+        };
+        var createdUser = await repository.CreateUserAsync(user);
+
         var trainer = new TrainerProfile
         {
-            UserId = request.UserId,
-            TenantId = request.TenantId,
+            UserId = createdUser.Id,
+            BranchId = request.BranchId,
             TrainerCode = request.TrainerCode,
             DisplayName = request.DisplayName,
             ProfileImage = request.ProfileImage,
@@ -100,7 +117,7 @@ public class TrainerService(ITrainerRepository repository) : ITrainerService
         {
             TrainerId = id,
             ClientId = request.ClientId,
-            TenantId = request.TenantId,
+            BranchId = request.BranchId,
             Notes = request.Notes,
             Status = TrainerAssignmentStatus.Active
         };
@@ -161,16 +178,16 @@ public class TrainerService(ITrainerRepository repository) : ITrainerService
         return new TrainerEarningsResponse { TrainerId = id, TotalEarnings = 0, CommissionEarned = 0, Month = month, Year = year };
     }
 
-    public async Task<TrainerResponse?> AutoAssignAsync(ulong clientId, ulong tenantId)
+    public async Task<TrainerResponse?> AutoAssignAsync(ulong clientId, ulong branchId)
     {
-        var trainers = await repository.GetAvailableTrainersAsync(tenantId);
+        var trainers = await repository.GetAvailableTrainersAsync(branchId);
         var trainer = trainers.MinBy(t => t.TotalSessions);
         return trainer is null ? null : MapToResponse(trainer);
     }
 
     private static TrainerResponse MapToResponse(TrainerProfile t) => new()
     {
-        Id = t.Id, UserId = t.UserId, TenantId = t.TenantId, TrainerCode = t.TrainerCode,
+        Id = t.Id, UserId = t.UserId, BranchId = t.BranchId, TrainerCode = t.TrainerCode,
         DisplayName = t.DisplayName, ProfileImage = t.ProfileImage, Bio = t.Bio,
         ExperienceYears = t.ExperienceYears, Gender = t.Gender, DateOfBirth = t.DateOfBirth,
         Phone = t.Phone, Email = t.Email, Address = t.Address, Notes = t.Notes,

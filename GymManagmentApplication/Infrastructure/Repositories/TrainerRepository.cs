@@ -1,73 +1,94 @@
+using GymManagmentApplication.Domain.Entities.Identity;
 using GymManagmentApplication.Domain.Entities.Training;
 using GymManagmentApplication.Domain.Enums;
+using GymManagmentApplication.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 
 namespace GymManagmentApplication.Infrastructure.Repositories;
 
-public class TrainerRepository : ITrainerRepository
+public class TrainerRepository(AppDbContext db) : ITrainerRepository
 {
-    private static readonly List<TrainerProfile> _store = [];
-    private static readonly List<TrainerClientAssignment> _assignments = [];
-    private static readonly List<TrainerAvailabilitySlot> _slots = [];
-    private static ulong _nextId = 1;
-    private static ulong _assignId = 1;
-    private static ulong _slotId = 1;
-
-    public Task<(List<TrainerProfile> Items, int Total)> GetAllAsync(int pageNumber, int pageSize)
+    public async Task<User> CreateUserAsync(User user)
     {
-        var total = _store.Count;
-        var items = _store.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
-        return Task.FromResult((items, total));
+        user.CreatedAt = DateTime.UtcNow;
+        user.UpdatedAt = DateTime.UtcNow;
+        db.Users.Add(user);
+        await db.SaveChangesAsync();
+        return user;
     }
 
-    public Task<TrainerProfile?> GetByIdAsync(ulong id) =>
-        Task.FromResult(_store.FirstOrDefault(t => t.Id == id));
-
-    public Task<TrainerProfile> CreateAsync(TrainerProfile trainer)
+    public async Task<(List<TrainerProfile> Items, int Total)> GetAllAsync(int pageNumber, int pageSize)
     {
-        trainer.Id = _nextId++;
+        var total = await db.TrainerProfiles.CountAsync();
+        var items = await db.TrainerProfiles
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+        return (items, total);
+    }
+
+    public async Task<TrainerProfile?> GetByIdAsync(ulong id) =>
+        await db.TrainerProfiles.FirstOrDefaultAsync(t => t.Id == id);
+
+    public async Task<TrainerProfile> CreateAsync(TrainerProfile trainer)
+    {
         trainer.CreatedAt = DateTime.UtcNow;
         trainer.UpdatedAt = DateTime.UtcNow;
-        _store.Add(trainer);
-        return Task.FromResult(trainer);
+        db.TrainerProfiles.Add(trainer);
+        await db.SaveChangesAsync();
+        return trainer;
     }
 
-    public Task<TrainerProfile> UpdateAsync(TrainerProfile trainer)
+    public async Task<TrainerProfile> UpdateAsync(TrainerProfile trainer)
     {
         trainer.UpdatedAt = DateTime.UtcNow;
-        return Task.FromResult(trainer);
+        db.TrainerProfiles.Update(trainer);
+        await db.SaveChangesAsync();
+        return trainer;
     }
 
-    public Task<List<TrainerClientAssignment>> GetClientAssignmentsAsync(ulong trainerId) =>
-        Task.FromResult(_assignments.Where(a => a.TrainerId == trainerId && a.Status == TrainerAssignmentStatus.Active).ToList());
+    public async Task<List<TrainerClientAssignment>> GetClientAssignmentsAsync(ulong trainerId) =>
+        await db.TrainerClientAssignments
+            .Where(a => a.TrainerId == trainerId && a.Status == TrainerAssignmentStatus.Active)
+            .ToListAsync();
 
-    public Task<TrainerClientAssignment> AddClientAssignmentAsync(TrainerClientAssignment assignment)
+    public async Task<TrainerClientAssignment> AddClientAssignmentAsync(TrainerClientAssignment assignment)
     {
-        assignment.Id = _assignId++;
         assignment.AssignedAt = DateTime.UtcNow;
-        _assignments.Add(assignment);
-        return Task.FromResult(assignment);
+        db.TrainerClientAssignments.Add(assignment);
+        await db.SaveChangesAsync();
+        return assignment;
     }
 
-    public Task<bool> RemoveClientAssignmentAsync(ulong trainerId, ulong clientId)
+    public async Task<bool> RemoveClientAssignmentAsync(ulong trainerId, ulong clientId)
     {
-        var a = _assignments.FirstOrDefault(x => x.TrainerId == trainerId && x.ClientId == clientId && x.Status == TrainerAssignmentStatus.Active);
-        if (a is null) return Task.FromResult(false);
-        a.Status = TrainerAssignmentStatus.Inactive;
-        a.EndedAt = DateTime.UtcNow;
-        return Task.FromResult(true);
+        var assignment = await db.TrainerClientAssignments
+            .FirstOrDefaultAsync(a => a.TrainerId == trainerId && a.ClientId == clientId && a.Status == TrainerAssignmentStatus.Active);
+        if (assignment is null) return false;
+        assignment.Status = TrainerAssignmentStatus.Inactive;
+        assignment.EndedAt = DateTime.UtcNow;
+        await db.SaveChangesAsync();
+        return true;
     }
 
-    public Task<List<TrainerAvailabilitySlot>> GetSlotsAsync(ulong trainerId) =>
-        Task.FromResult(_slots.Where(s => s.TrainerId == trainerId && s.IsActive).ToList());
+    public async Task<List<TrainerAvailabilitySlot>> GetSlotsAsync(ulong trainerId) =>
+        await db.TrainerAvailabilitySlots
+            .Where(s => s.TrainerId == trainerId && s.IsActive)
+            .ToListAsync();
 
-    public Task SetSlotsAsync(ulong trainerId, List<TrainerAvailabilitySlot> slots)
+    public async Task SetSlotsAsync(ulong trainerId, List<TrainerAvailabilitySlot> slots)
     {
-        _slots.RemoveAll(s => s.TrainerId == trainerId);
-        foreach (var s in slots) { s.Id = _slotId++; s.TrainerId = trainerId; }
-        _slots.AddRange(slots);
-        return Task.CompletedTask;
+        var existing = await db.TrainerAvailabilitySlots
+            .Where(s => s.TrainerId == trainerId)
+            .ToListAsync();
+        db.TrainerAvailabilitySlots.RemoveRange(existing);
+        foreach (var s in slots) s.TrainerId = trainerId;
+        db.TrainerAvailabilitySlots.AddRange(slots);
+        await db.SaveChangesAsync();
     }
 
-    public Task<List<TrainerProfile>> GetAvailableTrainersAsync(ulong tenantId) =>
-        Task.FromResult(_store.Where(t => t.TenantId == tenantId && t.IsAvailable).ToList());
+    public async Task<List<TrainerProfile>> GetAvailableTrainersAsync(ulong branchId) =>
+        await db.TrainerProfiles
+            .Where(t => t.BranchId == branchId && t.IsAvailable)
+            .ToListAsync();
 }

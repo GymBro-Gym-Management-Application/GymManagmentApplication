@@ -18,7 +18,9 @@ public class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddlewa
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
             context.Response.ContentType = "application/json";
 
-            var response = ApiResponse<object>.Fail("An unexpected error occurred.", [ex.Message]);
+            var errors = new List<string> { ex.Message };
+            if (ex.InnerException is not null) errors.Add(ex.InnerException.Message);
+            var response = ApiResponse<object>.Fail("An unexpected error occurred.", errors);
             await context.Response.WriteAsync(JsonSerializer.Serialize(response));
         }
     }

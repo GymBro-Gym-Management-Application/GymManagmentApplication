@@ -17,5 +17,5 @@ public interface ITrainerService
     Task<bool> SetScheduleAsync(ulong id, SetScheduleRequest request);
     Task<TrainerPerformanceResponse> GetPerformanceAsync(ulong id);
     Task<TrainerEarningsResponse> GetEarningsAsync(ulong id, int month, int year);
-    Task<TrainerResponse?> AutoAssignAsync(ulong clientId, ulong tenantId);
+    Task<TrainerResponse?> AutoAssignAsync(ulong clientId, ulong branchId);
 }

@@ -9,16 +9,16 @@ namespace GymManagmentApplication.Controllers;
 
 [ApiController]
 [Route("api/trainers")]
-[AuthorizeRoles("admin", "trainer", "client")]
+//[AuthorizeRoles("admin", "trainer", "client")]
 public class TrainerController(ITrainerService service, IValidator<CreateTrainerRequest> validator) : ControllerBase
 {
     [HttpGet]
-    [AuthorizeRoles("admin", "trainer", "client")]
+    //[AuthorizeRoles("admin", "trainer", "client")]
     public async Task<ActionResult<ApiResponse<object>>> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20)
         => Ok(ApiResponse<object>.Ok(await service.GetAllAsync(pageNumber, pageSize)));
 
     [HttpPost]
-    [AuthorizeRoles("admin")]
+    //[AuthorizeRoles("admin")]
     public async Task<ActionResult<ApiResponse<object>>> Create([FromBody] CreateTrainerRequest request)
     {
         var v = await validator.ValidateAsync(request);
@@ -83,9 +83,9 @@ public class TrainerController(ITrainerService service, IValidator<CreateTrainer
 
     [HttpPost("auto-assign")]
     [AuthorizeRoles("admin")]
-    public async Task<ActionResult<ApiResponse<object>>> AutoAssign([FromQuery] ulong clientId, [FromQuery] ulong tenantId)
+    public async Task<ActionResult<ApiResponse<object>>> AutoAssign([FromQuery] ulong clientId, [FromQuery] ulong branchId)
     {
-        var result = await service.AutoAssignAsync(clientId, tenantId);
+        var result = await service.AutoAssignAsync(clientId, branchId);
         return result is null ? NotFound(ApiResponse<object>.Fail("No available trainers found.")) : Ok(ApiResponse<object>.Ok(result));
     }
 }
