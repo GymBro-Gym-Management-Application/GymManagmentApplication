@@ -41,7 +41,7 @@ public class AuthController(
     }
 
     [HttpPost("logout")]
-    [AuthorizeRoles("admin", "trainer", "client")]
+    //[AuthorizeRoles("admin", "trainer", "client")]
     public async Task<ActionResult<ApiResponse<object>>> Logout()
     {
         var userId = ulong.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "0");
@@ -76,7 +76,7 @@ public class AuthController(
     }
 
     [HttpPut("change-password")]
-    [AuthorizeRoles("admin", "trainer", "client")]
+    //[AuthorizeRoles("admin", "trainer", "client")]
     public async Task<ActionResult<ApiResponse<object>>> ChangePassword([FromBody] ChangePasswordRequest request)
     {
         var v = await changeValidator.ValidateAsync(request);
@@ -87,7 +87,7 @@ public class AuthController(
     }
 
     [HttpGet("me")]
-    [AuthorizeRoles("admin", "trainer", "client")]
+    //[AuthorizeRoles("admin", "trainer", "client")]
     public async Task<ActionResult<ApiResponse<object>>> Me()
     {
         var userId = ulong.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "0");
