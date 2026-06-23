@@ -1,3 +1,4 @@
+using GymManagmentApplication.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace GymManagmentApplication.Infrastructure.Repositories.Tenant;
