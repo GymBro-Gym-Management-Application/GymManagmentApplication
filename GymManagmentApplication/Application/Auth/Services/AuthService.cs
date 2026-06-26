@@ -5,44 +5,94 @@ using System.Text;
 using GymManagmentApplication.Application.Auth.Interfaces;
 using GymManagmentApplication.Application.Auth.Requests;
 using GymManagmentApplication.Application.Auth.Responses;
+using GymManagmentApplication.Domain.Entities.Identity;
+using GymManagmentApplication.Domain.Enums;
+using GymManagmentApplication.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace GymManagmentApplication.Application.Auth.Services;
 
-public class AuthService(IOptions<JwtSettings> jwtOptions) : IAuthService
+public class AuthService(IOptions<JwtSettings> jwtOptions, AppDbContext db) : IAuthService
 {
     private readonly JwtSettings _jwt = jwtOptions.Value;
 
-    private static readonly List<SeedUser> _users =
-    [
-        new(1, "admin@gym.com",   Hash("Admin@123"),   "admin",   "Admin",   "User",   true),
-        new(2, "trainer@gym.com", Hash("Trainer@123"), "trainer", "Trainer", "User",   true),
-        new(3, "client@gym.com",  Hash("Client@123"),  "client",  "Client",  "User",   true),
-    ];
-
+    // In-memory stores for refresh/reset tokens and OTPs (stateless; replace with DB-backed if needed)
     private static readonly Dictionary<string, (ulong UserId, DateTime Expiry)> _refreshTokens = [];
     private static readonly Dictionary<string, (ulong UserId, DateTime Expiry)> _passwordResetTokens = [];
     private static readonly Dictionary<string, (string Otp, DateTime Expiry)> _otpStore = [];
-    private static ulong _nextId = 4;
 
-    public Task<AuthResponse?> RegisterAsync(RegisterRequest request)
+    public async Task<AuthResponse?> RegisterAsync(RegisterRequest request)
     {
-        if (_users.Any(u => u.Email.Equals(request.Email, StringComparison.OrdinalIgnoreCase)))
-            return Task.FromResult<AuthResponse?>(null);
+        // Reject if email already exists
+        var exists = await db.Users
+            .AnyAsync(u => u.Email != null && u.Email.ToLower() == request.Email.ToLower() && u.DeletedAt == null);
+        if (exists) return null;
 
-        var user = new SeedUser(_nextId++, request.Email, Hash(request.Password), request.Role, request.FirstName, request.LastName, false);
-        _users.Add(user);
-        return Task.FromResult<AuthResponse?>(GenerateTokens(user));
+        // Resolve TenantId — fall back to the first (default) tenant if not provided
+        var tenantId = request.TenantId != 0
+            ? request.TenantId
+            : (await db.Tenants.OrderBy(t => t.Id).Select(t => t.Id).FirstOrDefaultAsync());
+
+        if (tenantId == 0)
+            throw new InvalidOperationException("No tenant found. Ensure the database is seeded.");
+
+        // Resolve role by slug — fall back to 'client' role on the resolved tenant
+        var roleSlug = string.IsNullOrWhiteSpace(request.Role) ? "client" : request.Role.ToLower();
+        var role = await db.Roles
+            .FirstOrDefaultAsync(r => r.Slug == roleSlug && r.TenantId == tenantId)
+            ?? await db.Roles.FirstOrDefaultAsync(r => r.Slug == "client");
+
+        if (role is null)
+            throw new InvalidOperationException("No roles found. Ensure the database is seeded.");
+
+        // Generate Id in application code — DB uses numeric(20,0) with no identity strategy
+        var maxId = await db.Users.MaxAsync(u => (ulong?)u.Id) ?? 0UL;
+        var newId = maxId + 1;
+
+        var user = new User
+        {
+            Id           = newId,
+            Uuid         = Guid.NewGuid().ToString(),
+            Email        = request.Email,
+            PasswordHash = Hash(request.Password),
+            FirstName    = request.FirstName,
+            LastName     = request.LastName,
+            RoleId       = role.Id,
+            TenantId     = tenantId,
+            Status       = UserStatus.Pending,
+            CreatedAt    = DateTime.UtcNow,
+            UpdatedAt    = DateTime.UtcNow
+        };
+
+        db.Users.Add(user);
+        await db.SaveChangesAsync();
+
+        return GenerateTokens(user, roleSlug);
     }
 
-    public Task<AuthResponse?> LoginAsync(LoginRequest request)
+    public async Task<AuthResponse?> LoginAsync(LoginRequest request)
     {
-        var user = _users.FirstOrDefault(u =>
-            u.Email.Equals(request.Email, StringComparison.OrdinalIgnoreCase) &&
-            u.PasswordHash == Hash(request.Password));
+        var passwordHash = Hash(request.Password);
+        var user = await db.Users
+            .Include(u => u.Role)
+            .FirstOrDefaultAsync(u =>
+                u.Email != null &&
+                u.Email.ToLower() == request.Email.ToLower() &&
+                u.PasswordHash == passwordHash &&
+                u.DeletedAt == null);
 
-        return Task.FromResult(user is null ? null : GenerateTokens(user));
+        if (user is null) return null;
+
+        // Update last login
+        user.LastLoginAt = DateTime.UtcNow;
+        user.LoginCount++;
+        user.UpdatedAt = DateTime.UtcNow;
+        await db.SaveChangesAsync();
+
+        var roleSlug = user.Role?.Slug ?? "client";
+        return GenerateTokens(user, roleSlug);
     }
 
     public Task LogoutAsync(ulong userId)
@@ -52,109 +102,147 @@ public class AuthService(IOptions<JwtSettings> jwtOptions) : IAuthService
         return Task.CompletedTask;
     }
 
-    public Task<AuthResponse?> RefreshAsync(string refreshToken)
+    public async Task<AuthResponse?> RefreshAsync(string refreshToken)
     {
         if (!_refreshTokens.TryGetValue(refreshToken, out var entry) || entry.Expiry < DateTime.UtcNow)
-            return Task.FromResult<AuthResponse?>(null);
+            return null;
 
         _refreshTokens.Remove(refreshToken);
-        var user = _users.FirstOrDefault(u => u.Id == entry.UserId);
-        return Task.FromResult(user is null ? null : GenerateTokens(user));
+
+        var user = await db.Users
+            .Include(u => u.Role)
+            .FirstOrDefaultAsync(u => u.Id == entry.UserId && u.DeletedAt == null);
+
+        if (user is null) return null;
+
+        var roleSlug = user.Role?.Slug ?? "client";
+        return GenerateTokens(user, roleSlug);
     }
 
-    public Task<bool> ForgotPasswordAsync(ForgotPasswordRequest request)
+    public async Task<bool> ForgotPasswordAsync(ForgotPasswordRequest request)
     {
-        var user = _users.FirstOrDefault(u => u.Email.Equals(request.Email, StringComparison.OrdinalIgnoreCase));
-        if (user is null) return Task.FromResult(false);
+        var user = await db.Users
+            .FirstOrDefaultAsync(u => u.Email != null && u.Email.ToLower() == request.Email.ToLower() && u.DeletedAt == null);
+        if (user is null) return false;
+
         var token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
         _passwordResetTokens[token] = (user.Id, DateTime.UtcNow.AddHours(1));
         // In production: send token via email
-        return Task.FromResult(true);
+        return true;
     }
 
-    public Task<bool> ResetPasswordAsync(ResetPasswordRequest request)
+    public async Task<bool> ResetPasswordAsync(ResetPasswordRequest request)
     {
         if (!_passwordResetTokens.TryGetValue(request.Token, out var entry) || entry.Expiry < DateTime.UtcNow)
-            return Task.FromResult(false);
+            return false;
 
-        var user = _users.FirstOrDefault(u => u.Id == entry.UserId);
-        if (user is null) return Task.FromResult(false);
+        var user = await db.Users.FindAsync(entry.UserId);
+        if (user is null) return false;
 
-        _users.Remove(user);
-        _users.Add(user with { PasswordHash = Hash(request.NewPassword) });
+        user.PasswordHash = Hash(request.NewPassword);
+        user.UpdatedAt = DateTime.UtcNow;
+        await db.SaveChangesAsync();
+
         _passwordResetTokens.Remove(request.Token);
-        return Task.FromResult(true);
+        return true;
     }
 
-    public Task<bool> ChangePasswordAsync(ulong userId, ChangePasswordRequest request)
+    public async Task<bool> ChangePasswordAsync(ulong userId, ChangePasswordRequest request)
     {
-        var user = _users.FirstOrDefault(u => u.Id == userId && u.PasswordHash == Hash(request.CurrentPassword));
-        if (user is null) return Task.FromResult(false);
-        _users.Remove(user);
-        _users.Add(user with { PasswordHash = Hash(request.NewPassword) });
-        return Task.FromResult(true);
+        var user = await db.Users.FindAsync(userId);
+        if (user is null || user.PasswordHash != Hash(request.CurrentPassword)) return false;
+
+        user.PasswordHash = Hash(request.NewPassword);
+        user.UpdatedAt = DateTime.UtcNow;
+        await db.SaveChangesAsync();
+        return true;
     }
 
-    public Task<UserProfileResponse?> GetMeAsync(ulong userId)
+    public async Task<UserProfileResponse?> GetMeAsync(ulong userId)
     {
-        var user = _users.FirstOrDefault(u => u.Id == userId);
-        if (user is null) return Task.FromResult<UserProfileResponse?>(null);
-        return Task.FromResult<UserProfileResponse?>(new UserProfileResponse
+        var user = await db.Users
+            .Include(u => u.Role)
+            .FirstOrDefaultAsync(u => u.Id == userId && u.DeletedAt == null);
+
+        if (user is null) return null;
+
+        return new UserProfileResponse
         {
-            UserId = user.Id, Email = user.Email, FirstName = user.FirstName,
-            LastName = user.LastName, Role = user.Role, IsEmailVerified = user.IsEmailVerified
-        });
+            UserId          = user.Id,
+            Email           = user.Email ?? string.Empty,
+            FirstName       = user.FirstName ?? string.Empty,
+            LastName        = user.LastName ?? string.Empty,
+            Role            = user.Role?.Slug ?? "client",
+            IsEmailVerified = user.EmailVerifiedAt.HasValue
+        };
     }
 
-    public Task<bool> VerifyEmailAsync(VerifyEmailRequest request)
+    public async Task<bool> VerifyEmailAsync(VerifyEmailRequest request)
     {
         if (!_otpStore.TryGetValue(request.Email, out var entry) || entry.Expiry < DateTime.UtcNow || entry.Otp != request.Otp)
-            return Task.FromResult(false);
+            return false;
 
-        var user = _users.FirstOrDefault(u => u.Email.Equals(request.Email, StringComparison.OrdinalIgnoreCase));
-        if (user is null) return Task.FromResult(false);
-        _users.Remove(user);
-        _users.Add(user with { IsEmailVerified = true });
+        var user = await db.Users
+            .FirstOrDefaultAsync(u => u.Email != null && u.Email.ToLower() == request.Email.ToLower() && u.DeletedAt == null);
+        if (user is null) return false;
+
+        user.EmailVerifiedAt = DateTime.UtcNow;
+        user.UpdatedAt = DateTime.UtcNow;
+        await db.SaveChangesAsync();
+
         _otpStore.Remove(request.Email);
-        return Task.FromResult(true);
+        return true;
     }
 
-    public Task<bool> ResendOtpAsync(ResendOtpRequest request)
+    public async Task<bool> ResendOtpAsync(ResendOtpRequest request)
     {
-        var user = _users.FirstOrDefault(u => u.Email.Equals(request.Email, StringComparison.OrdinalIgnoreCase));
-        if (user is null) return Task.FromResult(false);
+        var exists = await db.Users
+            .AnyAsync(u => u.Email != null && u.Email.ToLower() == request.Email.ToLower() && u.DeletedAt == null);
+        if (!exists) return false;
+
         var otp = Random.Shared.Next(100000, 999999).ToString();
         _otpStore[request.Email] = (otp, DateTime.UtcNow.AddMinutes(10));
         // In production: send via email/SMS based on request.Channel
-        return Task.FromResult(true);
+        return true;
     }
 
-    private AuthResponse GenerateTokens(SeedUser user)
+    private AuthResponse GenerateTokens(User user, string roleSlug)
     {
         var expiry = DateTime.UtcNow.AddMinutes(_jwt.AccessTokenExpiryMinutes);
-        var accessToken = CreateJwt(user, expiry);
+        var accessToken = CreateJwt(user, roleSlug, expiry);
         var refreshToken = GenerateRefreshToken();
         _refreshTokens[refreshToken] = (user.Id, DateTime.UtcNow.AddDays(_jwt.RefreshTokenExpiryDays));
-        return new AuthResponse { AccessToken = accessToken, RefreshToken = refreshToken, ExpiresAt = expiry, Role = user.Role, UserId = user.Id, Email = user.Email };
+        return new AuthResponse
+        {
+            AccessToken  = accessToken,
+            RefreshToken = refreshToken,
+            ExpiresAt    = expiry,
+            Role         = roleSlug,
+            UserId       = user.Id,
+            Email        = user.Email ?? string.Empty
+        };
     }
 
-    private string CreateJwt(SeedUser user, DateTime expiry)
+    private string CreateJwt(User user, string roleSlug, DateTime expiry)
     {
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Key));
+        var key   = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Key));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         var claims = new[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email),
-            new Claim(ClaimTypes.Role, user.Role),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new Claim(JwtRegisteredClaimNames.Sub,   user.Id.ToString()),
+            new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
+            new Claim(ClaimTypes.Role,               roleSlug),
+            new Claim(JwtRegisteredClaimNames.Jti,   Guid.NewGuid().ToString())
         };
-        var token = new JwtSecurityToken(issuer: _jwt.Issuer, audience: _jwt.Audience, claims: claims, expires: expiry, signingCredentials: creds);
+        var token = new JwtSecurityToken(
+            issuer:            _jwt.Issuer,
+            audience:          _jwt.Audience,
+            claims:            claims,
+            expires:           expiry,
+            signingCredentials: creds);
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
     private static string GenerateRefreshToken() => Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
     private static string Hash(string input) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(input)));
-
-    private record SeedUser(ulong Id, string Email, string PasswordHash, string Role, string FirstName, string LastName, bool IsEmailVerified);
 }

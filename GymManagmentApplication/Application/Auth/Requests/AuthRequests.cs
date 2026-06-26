@@ -7,6 +7,7 @@ public class RegisterRequest
     public string FirstName { get; set; } = default!;
     public string LastName { get; set; } = default!;
     public string Role { get; set; } = "client";
+    public ulong TenantId { get; set; }
 }
 
 public class LoginRequest

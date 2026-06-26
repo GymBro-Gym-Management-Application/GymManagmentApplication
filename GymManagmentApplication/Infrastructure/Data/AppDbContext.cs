@@ -189,12 +189,13 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     {
         base.OnModelCreating(modelBuilder);
 
-        // Auto-increment for ulong PKs (PostgreSQL doesn't infer this for ulong)
+        // Auto-increment for ulong PKs — Id is generated in application code (MAX+1)
+        // because the DB uses numeric(20,0) with no native identity/sequence strategy.
         foreach (var entity in modelBuilder.Model.GetEntityTypes())
         {
             var pk = entity.FindProperty("Id");
             if (pk != null && pk.ClrType == typeof(ulong))
-                pk.ValueGenerated = Microsoft.EntityFrameworkCore.Metadata.ValueGenerated.OnAdd;
+                pk.ValueGenerated = Microsoft.EntityFrameworkCore.Metadata.ValueGenerated.Never;
         }
 
         // Composite keys
