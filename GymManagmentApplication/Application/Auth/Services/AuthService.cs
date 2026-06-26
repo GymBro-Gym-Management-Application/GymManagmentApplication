@@ -75,8 +75,10 @@ public class AuthService(IOptions<JwtSettings> jwtOptions, AppDbContext db) : IA
     public async Task<AuthResponse?> LoginAsync(LoginRequest request)
     {
         var passwordHash = Hash(request.Password);
+
+        // Find user by email + password only — don't join Role here,
+        // a broken RoleId FK would cause Include to fail or return null
         var user = await db.Users
-            .Include(u => u.Role)
             .FirstOrDefaultAsync(u =>
                 u.Email != null &&
                 u.Email.ToLower() == request.Email.ToLower() &&
@@ -85,13 +87,18 @@ public class AuthService(IOptions<JwtSettings> jwtOptions, AppDbContext db) : IA
 
         if (user is null) return null;
 
+        // Load role separately so a missing/0 RoleId doesn't block login
+        var role = user.RoleId != 0
+            ? await db.Roles.FirstOrDefaultAsync(r => r.Id == user.RoleId)
+            : null;
+        var roleSlug = role?.Slug ?? "client";
+
         // Update last login
         user.LastLoginAt = DateTime.UtcNow;
         user.LoginCount++;
         user.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync();
 
-        var roleSlug = user.Role?.Slug ?? "client";
         return GenerateTokens(user, roleSlug);
     }
 
@@ -110,12 +117,14 @@ public class AuthService(IOptions<JwtSettings> jwtOptions, AppDbContext db) : IA
         _refreshTokens.Remove(refreshToken);
 
         var user = await db.Users
-            .Include(u => u.Role)
             .FirstOrDefaultAsync(u => u.Id == entry.UserId && u.DeletedAt == null);
 
         if (user is null) return null;
 
-        var roleSlug = user.Role?.Slug ?? "client";
+        var role = user.RoleId != 0
+            ? await db.Roles.FirstOrDefaultAsync(r => r.Id == user.RoleId)
+            : null;
+        var roleSlug = role?.Slug ?? "client";
         return GenerateTokens(user, roleSlug);
     }
 
@@ -161,10 +170,13 @@ public class AuthService(IOptions<JwtSettings> jwtOptions, AppDbContext db) : IA
     public async Task<UserProfileResponse?> GetMeAsync(ulong userId)
     {
         var user = await db.Users
-            .Include(u => u.Role)
             .FirstOrDefaultAsync(u => u.Id == userId && u.DeletedAt == null);
 
         if (user is null) return null;
+
+        var role = user.RoleId != 0
+            ? await db.Roles.FirstOrDefaultAsync(r => r.Id == user.RoleId)
+            : null;
 
         return new UserProfileResponse
         {
@@ -172,7 +184,7 @@ public class AuthService(IOptions<JwtSettings> jwtOptions, AppDbContext db) : IA
             Email           = user.Email ?? string.Empty,
             FirstName       = user.FirstName ?? string.Empty,
             LastName        = user.LastName ?? string.Empty,
-            Role            = user.Role?.Slug ?? "client",
+            Role            = role?.Slug ?? "client",
             IsEmailVerified = user.EmailVerifiedAt.HasValue
         };
     }
