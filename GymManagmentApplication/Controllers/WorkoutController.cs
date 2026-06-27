@@ -24,7 +24,7 @@ public class WorkoutController(
         => Ok(ApiResponse<object>.Ok(await service.GetAllAsync(request)));
 
     [HttpPost]
-    [AuthorizeRoles("admin", "trainer")]
+    //[AuthorizeRoles("admin", "trainer")]
     public async Task<ActionResult<ApiResponse<object>>> Create([FromBody] CreateWorkoutRequest request)
     {
         var v = await createValidator.ValidateAsync(request);
@@ -40,7 +40,7 @@ public class WorkoutController(
     }
 
     [HttpPut("{id:long}")]
-    [AuthorizeRoles("admin", "trainer")]
+    //[AuthorizeRoles("admin", "trainer")]
     public async Task<ActionResult<ApiResponse<object>>> Update(ulong id, [FromBody] UpdateWorkoutRequest request)
     {
         var v = await updateValidator.ValidateAsync(request);
@@ -50,7 +50,7 @@ public class WorkoutController(
     }
 
     [HttpDelete("{id:long}")]
-    [AuthorizeRoles("admin", "trainer")]
+    //[AuthorizeRoles("admin", "trainer")]
     public async Task<ActionResult<ApiResponse<object>>> Delete(ulong id)
     {
         var ok = await service.DeleteAsync(id);
@@ -58,7 +58,7 @@ public class WorkoutController(
     }
 
     [HttpPost("{id:long}/clone")]
-    [AuthorizeRoles("admin", "trainer")]
+    //[AuthorizeRoles("admin", "trainer")]
     public async Task<ActionResult<ApiResponse<object>>> Clone(ulong id)
     {
         var result = await service.CloneAsync(id, UserId);
@@ -66,7 +66,7 @@ public class WorkoutController(
     }
 
     [HttpPost("assign")]
-    [AuthorizeRoles("admin", "trainer")]
+    //[AuthorizeRoles("admin", "trainer")]
     public async Task<ActionResult<ApiResponse<object>>> Assign([FromBody] AssignWorkoutRequest request)
     {
         var v = await assignValidator.ValidateAsync(request);
@@ -75,7 +75,7 @@ public class WorkoutController(
     }
 
     [HttpGet("{id:long}/progress")]
-    [AuthorizeRoles("admin", "trainer", "client")]
+    //[AuthorizeRoles("admin", "trainer", "client")]
     public async Task<ActionResult<ApiResponse<object>>> GetProgress(ulong id, [FromQuery] ulong clientId)
     {
         var result = await service.GetProgressAsync(id, clientId);
@@ -83,7 +83,7 @@ public class WorkoutController(
     }
 
     [HttpPost("{id:long}/complete")]
-    [AuthorizeRoles("admin", "trainer", "client")]
+    //[AuthorizeRoles("admin", "trainer", "client")]
     public async Task<ActionResult<ApiResponse<object>>> Complete(ulong id, [FromBody] CompleteWorkoutRequest request)
     {
         var v = await completeValidator.ValidateAsync(request);
@@ -92,7 +92,7 @@ public class WorkoutController(
     }
 
     [HttpGet("{id:long}/score")]
-    [AuthorizeRoles("admin", "trainer", "client")]
+    //[AuthorizeRoles("admin", "trainer", "client")]
     public async Task<ActionResult<ApiResponse<object>>> GetScore(ulong id, [FromQuery] ulong clientId)
     {
         var result = await service.GetScoreAsync(id, clientId);
@@ -100,7 +100,7 @@ public class WorkoutController(
     }
 
     [HttpPost("{id:long}/share")]
-    [AuthorizeRoles("admin", "trainer", "client")]
+    //[AuthorizeRoles("admin", "trainer", "client")]
     public async Task<ActionResult<ApiResponse<object>>> Share(ulong id)
     {
         await service.ShareAsync(id, UserId);
@@ -108,7 +108,7 @@ public class WorkoutController(
     }
 
     [HttpPost("{id:long}/bookmark")]
-    [AuthorizeRoles("admin", "trainer", "client")]
+    //[AuthorizeRoles("admin", "trainer", "client")]
     public async Task<ActionResult<ApiResponse<object>>> Bookmark(ulong id)
     {
         await service.BookmarkAsync(id, UserId);

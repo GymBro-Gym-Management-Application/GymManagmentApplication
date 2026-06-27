@@ -9,7 +9,7 @@ namespace GymManagmentApplication.Controllers;
 
 [ApiController]
 [Route("api/corporate/accounts")]
-[AuthorizeRoles("admin")]
+//[AuthorizeRoles("admin")]
 public class CorporateController(ICorporateService service, IValidator<CreateCorporateAccountRequest> validator) : ControllerBase
 {
     [HttpGet]

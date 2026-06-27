@@ -9,7 +9,7 @@ namespace GymManagmentApplication.Controllers;
 
 [ApiController]
 [Route("api/biometric")]
-[AuthorizeRoles("admin")]
+//[AuthorizeRoles("admin")]
 public class BiometricController(
     IBiometricService service,
     IValidator<EnrollFaceRequest> enrollFaceValidator,

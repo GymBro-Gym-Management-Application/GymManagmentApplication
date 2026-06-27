@@ -24,7 +24,7 @@ public class ExerciseController(
     }
 
     [HttpPost]
-    [AuthorizeRoles("admin", "trainer")]
+    //[AuthorizeRoles("admin", "trainer")]
     public async Task<ActionResult<ApiResponse<object>>> Create([FromBody] CreateExerciseRequest request)
     {
         var v = await createValidator.ValidateAsync(request);
@@ -42,7 +42,7 @@ public class ExerciseController(
     }
 
     [HttpPut("{id:long}")]
-    [AuthorizeRoles("admin", "trainer")]
+    //[AuthorizeRoles("admin", "trainer")]
     public async Task<ActionResult<ApiResponse<object>>> Update(ulong id, [FromBody] UpdateExerciseRequest request)
     {
         var v = await updateValidator.ValidateAsync(request);
@@ -52,7 +52,7 @@ public class ExerciseController(
     }
 
     [HttpDelete("{id:long}")]
-    [AuthorizeRoles("admin", "trainer")]
+    //[AuthorizeRoles("admin", "trainer")]
     public async Task<ActionResult<ApiResponse<object>>> Delete(ulong id)
     {
         var ok = await service.DeleteAsync(id);
@@ -67,7 +67,7 @@ public class ExerciseController(
     }
 
     [HttpPost("{id:long}/video")]
-    [AuthorizeRoles("admin", "trainer")]
+    //[AuthorizeRoles("admin", "trainer")]
     public async Task<ActionResult<ApiResponse<object>>> UploadVideo(ulong id, IFormFile video)
     {
         var url = await service.UploadVideoAsync(id, video);
@@ -77,7 +77,7 @@ public class ExerciseController(
     }
 
     [HttpPost("{id:long}/video/annotate")]
-    [AuthorizeRoles("admin", "trainer")]
+    //[AuthorizeRoles("admin", "trainer")]
     public async Task<ActionResult<ApiResponse<object>>> AnnotateVideo(ulong id, [FromBody] AnnotateVideoRequest request)
     {
         var v = await annotateValidator.ValidateAsync(request);
