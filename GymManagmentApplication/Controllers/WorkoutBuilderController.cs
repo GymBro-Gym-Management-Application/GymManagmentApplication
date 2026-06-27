@@ -8,7 +8,7 @@ namespace GymManagmentApplication.Controllers;
 
 [ApiController]
 [Route("api/workouts")]
-//[AuthorizeRoles("admin", "trainer")]
+[AuthorizeRoles("admin", "trainer")]
 public class WorkoutBuilderController(IWorkoutBuilderService service) : ControllerBase
 {
     [HttpPost("{id:long}/circuits")]

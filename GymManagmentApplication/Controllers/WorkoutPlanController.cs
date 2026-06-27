@@ -23,7 +23,7 @@ public class WorkoutPlanController(
         => Ok(ApiResponse<object>.Ok(await service.GetAllAsync(request)));
 
     [HttpPost]
-    //[AuthorizeRoles("admin", "trainer")]
+    [AuthorizeRoles("admin", "trainer")]
     public async Task<ActionResult<ApiResponse<object>>> Create([FromBody] CreatePlanRequest request)
     {
         var v = await createValidator.ValidateAsync(request);
@@ -39,7 +39,7 @@ public class WorkoutPlanController(
     }
 
     [HttpPut("{id:long}")]
-    //[AuthorizeRoles("admin", "trainer")]
+    [AuthorizeRoles("admin", "trainer")]
     public async Task<ActionResult<ApiResponse<object>>> Update(ulong id, [FromBody] UpdatePlanRequest request)
     {
         var v = await updateValidator.ValidateAsync(request);
@@ -49,7 +49,7 @@ public class WorkoutPlanController(
     }
 
     [HttpDelete("{id:long}")]
-    //[AuthorizeRoles("admin")]
+    [AuthorizeRoles("admin")]
     public async Task<ActionResult<ApiResponse<object>>> Delete(ulong id)
     {
         var ok = await service.DeleteAsync(id);
@@ -64,7 +64,7 @@ public class WorkoutPlanController(
     }
 
     [HttpPost("{id:long}/branch")]
-    //[AuthorizeRoles("admin", "trainer")]
+    [AuthorizeRoles("admin", "trainer")]
     public async Task<ActionResult<ApiResponse<object>>> AddBranch(ulong id, [FromBody] AddBranchRequest request)
     {
         await service.AddBranchAsync(id, request);
@@ -72,7 +72,7 @@ public class WorkoutPlanController(
     }
 
     [HttpPut("{id:long}/progression")]
-    //[AuthorizeRoles("admin", "trainer")]
+    [AuthorizeRoles("admin", "trainer")]
     public async Task<ActionResult<ApiResponse<object>>> UpdateProgression(ulong id, [FromBody] UpdateProgressionRequest request)
     {
         var ok = await service.UpdateProgressionAsync(id, request);
@@ -80,7 +80,7 @@ public class WorkoutPlanController(
     }
 
     [HttpPost("{id:long}/assign")]
-    //[AuthorizeRoles("admin", "trainer")]
+    [AuthorizeRoles("admin", "trainer")]
     public async Task<ActionResult<ApiResponse<object>>> Assign(ulong id, [FromBody] AssignPlanRequest request)
     {
         var v = await assignValidator.ValidateAsync(request);
@@ -89,12 +89,12 @@ public class WorkoutPlanController(
     }
 
     [HttpGet("{id:long}/members")]
-    //[AuthorizeRoles("admin", "trainer")]
+    [AuthorizeRoles("admin", "trainer")]
     public async Task<ActionResult<ApiResponse<object>>> GetMembers(ulong id)
         => Ok(ApiResponse<object>.Ok(await service.GetMembersAsync(id)));
 
     [HttpGet("{id:long}/analytics")]
-    //[AuthorizeRoles("admin", "trainer")]
+    [AuthorizeRoles("admin", "trainer")]
     public async Task<ActionResult<ApiResponse<object>>> GetAnalytics(ulong id)
     {
         var result = await service.GetAnalyticsAsync(id);

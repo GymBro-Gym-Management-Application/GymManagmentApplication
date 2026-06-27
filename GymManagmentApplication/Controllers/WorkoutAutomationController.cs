@@ -9,7 +9,7 @@ namespace GymManagmentApplication.Controllers;
 
 [ApiController]
 [Route("api/workout-automation")]
-//[AuthorizeRoles("admin", "trainer")]
+[AuthorizeRoles("admin", "trainer")]
 public class WorkoutAutomationController(
     IWorkoutAutomationService service,
     IValidator<CreateAutomationRuleRequest> createValidator,

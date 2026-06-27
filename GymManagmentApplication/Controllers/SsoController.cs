@@ -35,12 +35,12 @@ public class SsoController(
     }
 
     [HttpGet("providers")]
-    //[AuthorizeRoles("admin")]
+    [AuthorizeRoles("admin")]
     public async Task<ActionResult<ApiResponse<object>>> GetProviders([FromQuery] ulong tenantId)
         => Ok(ApiResponse<object>.Ok(await service.GetProvidersAsync(tenantId)));
 
     [HttpPut("providers/{id}")]
-    //[AuthorizeRoles("admin")]
+    [AuthorizeRoles("admin")]
     public async Task<ActionResult<ApiResponse<object>>> ConfigureProvider(string id, [FromBody] ConfigureSsoProviderRequest request)
     {
         var v = await configureValidator.ValidateAsync(request);
@@ -50,7 +50,7 @@ public class SsoController(
     }
 
     [HttpDelete("providers/{id}")]
-    //[AuthorizeRoles("admin")]
+    [AuthorizeRoles("admin")]
     public async Task<ActionResult<ApiResponse<object>>> DeleteProvider(string id)
     {
         var ok = await service.DeleteProviderAsync(id);

@@ -28,7 +28,7 @@ public class TrainerController(ITrainerService service, IValidator<CreateTrainer
     }
 
     [HttpGet("{id}")]
-    //[AuthorizeRoles("admin", "trainer", "client")]
+    [AuthorizeRoles("admin", "trainer", "client")]
     public async Task<ActionResult<ApiResponse<object>>> GetById(ulong id)
     {
         var result = await service.GetByIdAsync(id);
@@ -36,7 +36,7 @@ public class TrainerController(ITrainerService service, IValidator<CreateTrainer
     }
 
     [HttpPut("{id}")]
-    //[AuthorizeRoles("admin", "trainer")]
+    [AuthorizeRoles("admin", "trainer")]
     public async Task<ActionResult<ApiResponse<object>>> Update(ulong id, [FromBody] UpdateTrainerRequest request)
     {
         var result = await service.UpdateAsync(id, request);
@@ -44,17 +44,17 @@ public class TrainerController(ITrainerService service, IValidator<CreateTrainer
     }
 
     [HttpGet("{id}/clients")]
-    //[AuthorizeRoles("admin", "trainer")]
+    [AuthorizeRoles("admin", "trainer")]
     public async Task<ActionResult<ApiResponse<object>>> GetClients(ulong id)
         => Ok(ApiResponse<object>.Ok(await service.GetClientsAsync(id)));
 
     [HttpPost("{id}/assign")]
-    //[AuthorizeRoles("admin")]
+    [AuthorizeRoles("admin")]
     public async Task<ActionResult<ApiResponse<object>>> AssignClient(ulong id, [FromBody] AssignClientRequest request)
         => Ok(ApiResponse<object>.Ok(await service.AssignClientAsync(id, request)));
 
     [HttpDelete("{id}/clients/{cid}")]
-    //[AuthorizeRoles("admin")]
+    [AuthorizeRoles("admin")]
     public async Task<ActionResult<ApiResponse<object>>> UnassignClient(ulong id, ulong cid)
     {
         var removed = await service.UnassignClientAsync(id, cid);
@@ -62,27 +62,27 @@ public class TrainerController(ITrainerService service, IValidator<CreateTrainer
     }
 
     [HttpGet("{id}/schedule")]
-    //[AuthorizeRoles("admin", "trainer", "client")]
+    [AuthorizeRoles("admin", "trainer", "client")]
     public async Task<ActionResult<ApiResponse<object>>> GetSchedule(ulong id)
         => Ok(ApiResponse<object>.Ok(await service.GetScheduleAsync(id)));
 
     [HttpPut("{id}/schedule")]
-    //[AuthorizeRoles("admin", "trainer")]
+    [AuthorizeRoles("admin", "trainer")]
     public async Task<ActionResult<ApiResponse<object>>> SetSchedule(ulong id, [FromBody] SetScheduleRequest request)
         => Ok(ApiResponse<object>.Ok(await service.SetScheduleAsync(id, request)));
 
     [HttpGet("{id}/performance")]
-    //[AuthorizeRoles("admin", "trainer")]
+    [AuthorizeRoles("admin", "trainer")]
     public async Task<ActionResult<ApiResponse<object>>> GetPerformance(ulong id)
         => Ok(ApiResponse<object>.Ok(await service.GetPerformanceAsync(id)));
 
     [HttpGet("{id}/earnings")]
-    //[AuthorizeRoles("admin", "trainer")]
+    [AuthorizeRoles("admin", "trainer")]
     public async Task<ActionResult<ApiResponse<object>>> GetEarnings(ulong id, [FromQuery] int month = 0, [FromQuery] int year = 0)
         => Ok(ApiResponse<object>.Ok(await service.GetEarningsAsync(id, month == 0 ? DateTime.UtcNow.Month : month, year == 0 ? DateTime.UtcNow.Year : year)));
 
     [HttpPost("auto-assign")]
-    //[AuthorizeRoles("admin")]
+    [AuthorizeRoles("admin")]
     public async Task<ActionResult<ApiResponse<object>>> AutoAssign([FromQuery] ulong clientId, [FromQuery] ulong branchId)
     {
         var result = await service.AutoAssignAsync(clientId, branchId);

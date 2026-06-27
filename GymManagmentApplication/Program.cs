@@ -194,9 +194,9 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseCors("AllowAll");
-// app.UseAuthentication();
-// app.UseMiddleware<JwtMiddleware>();
-// app.UseAuthorization();
+app.UseAuthentication();
+app.UseMiddleware<JwtMiddleware>();
+app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
