@@ -66,8 +66,11 @@ using GymManagmentApplication.Application.Health.Interfaces;
 using GymManagmentApplication.Application.Health.Services;
 using GymManagmentApplication.Application.Challenges.Interfaces;
 using GymManagmentApplication.Application.Challenges.Services;
+using GymManagmentApplication.Application.Challenges.Validators;
 using GymManagmentApplication.Application.UserModules.Interfaces;
 using GymManagmentApplication.Application.UserModules.Services;
+using GymManagmentApplication.Application.AiCoach.Interfaces;
+using GymManagmentApplication.Application.AiCoach.Services;
 using GymManagmentApplication.Infrastructure.Repositories.Branch;
 using GymManagmentApplication.Infrastructure.Repositories.Tenant;
 using Microsoft.EntityFrameworkCore;
@@ -168,6 +171,7 @@ builder.Services.AddValidatorsFromAssemblyContaining<CreateAutomationRuleValidat
 builder.Services.AddValidatorsFromAssemblyContaining<SetModuleAccessValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateMembershipPlanValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<AddCircuitValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateChallengeValidator>();
 
 // Application Services
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -196,6 +200,7 @@ builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IHealthService, HealthService>();
 builder.Services.AddScoped<IChallengesService, ChallengesService>();
 builder.Services.AddScoped<IUserModulesService, UserModulesService>();
+builder.Services.AddScoped<IAiCoachSettingsService, AiCoachSettingsService>();
 
 // Infrastructure Repositories
 builder.Services.AddScoped<ITenantRepository, TenantRepository>();

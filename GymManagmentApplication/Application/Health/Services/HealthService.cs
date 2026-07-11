@@ -1,3 +1,4 @@
+using GymManagmentApplication.Application.AiCoach.Interfaces;
 using GymManagmentApplication.Application.Health.Interfaces;
 using GymManagmentApplication.Application.Health.Responses;
 using GymManagmentApplication.Infrastructure.Data;
@@ -5,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GymManagmentApplication.Application.Health.Services;
 
-public class HealthService(AppDbContext db) : IHealthService
+public class HealthService(AppDbContext db, IAiCoachSettingsService aiCoachSettings) : IHealthService
 {
     private const double MoveGoalSteps = 8000;
     private const double TrainGoalMinutes = 60;
@@ -54,12 +55,51 @@ public class HealthService(AppDbContext db) : IHealthService
         };
 
         var streakDays = await ComputeStreakAsync(clientId, today);
+        var coachTip = await aiCoachSettings.GetTipForScoreAsync(todayMetric?.RecoveryScore);
 
         return new HealthTodayResponse
         {
             Rings = rings,
             Stats = stats,
-            StreakDays = streakDays
+            StreakDays = streakDays,
+            CoachTip = coachTip
+        };
+    }
+
+    public async Task<HealthAdminOverviewResponse> GetAdminOverviewAsync()
+    {
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
+        var todayMetrics = await db.HealthMetrics
+            .Where(m => m.MetricDate == today)
+            .Join(db.Users, m => m.ClientId, u => u.Id, (m, u) => new { Metric = m, User = u })
+            .ToListAsync();
+
+        var clients = todayMetrics
+            .Select(x => new ClientHealthRow
+            {
+                UserId = x.User.Id,
+                Name = $"{x.User.FirstName} {x.User.LastName}".Trim(),
+                Steps = x.Metric.Steps,
+                SleepHours = x.Metric.SleepHours,
+                RecoveryScore = x.Metric.RecoveryScore
+            })
+            .OrderBy(c => c.Name)
+            .ToList();
+
+        return new HealthAdminOverviewResponse
+        {
+            ClientsTrackedToday = clients.Count,
+            AvgRecoveryScore = clients.Any(c => c.RecoveryScore.HasValue)
+                ? clients.Where(c => c.RecoveryScore.HasValue).Average(c => (double)c.RecoveryScore!.Value)
+                : null,
+            AvgSleepHours = clients.Any(c => c.SleepHours.HasValue)
+                ? clients.Where(c => c.SleepHours.HasValue).Average(c => (double)c.SleepHours!.Value)
+                : null,
+            AvgSteps = clients.Any(c => c.Steps.HasValue)
+                ? clients.Where(c => c.Steps.HasValue).Average(c => (double)c.Steps!.Value)
+                : null,
+            Clients = clients
         };
     }
 

@@ -17,4 +17,9 @@ public class HealthController(IHealthService service) : ControllerBase
     [AuthorizeRoles("admin", "trainer", "client")]
     public async Task<ActionResult<ApiResponse<object>>> GetToday()
         => Ok(ApiResponse<object>.Ok(await service.GetTodayAsync(UserId)));
+
+    [HttpGet("admin/overview")]
+    [AuthorizeRoles("admin", "trainer")]
+    public async Task<ActionResult<ApiResponse<object>>> GetAdminOverview()
+        => Ok(ApiResponse<object>.Ok(await service.GetAdminOverviewAsync()));
 }
