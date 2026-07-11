@@ -11,4 +11,8 @@ public class CreateMemberRequest
     public DateOnly? Dob { get; set; }
     public string? AvatarUrl { get; set; }
     public string? Notes { get; set; }
+
+    // Optional trainer assignment on creation
+    public ulong? TrainerId { get; set; }
+    public ulong? BranchId { get; set; }
 }

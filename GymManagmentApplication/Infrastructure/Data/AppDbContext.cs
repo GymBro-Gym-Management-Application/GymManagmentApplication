@@ -33,6 +33,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<Permission> Permissions => Set<Permission>();
     public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
+    public DbSet<ModuleAccess> ModuleAccesses => Set<ModuleAccess>();
     public DbSet<UserSession> UserSessions => Set<UserSession>();
     public DbSet<SsoProvider> SsoProviders => Set<SsoProvider>();
 
@@ -202,6 +203,23 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<ExerciseMuscle>().HasKey(e => new { e.ExerciseId, e.MuscleId });
         modelBuilder.Entity<ExerciseEquipment>().HasKey(e => new { e.ExerciseId, e.EquipmentId });
         modelBuilder.Entity<RolePermission>().HasKey(e => new { e.RoleId, e.PermissionId });
+
+        // ModuleAccess — unique constraint per tenant + role + module
+        modelBuilder.Entity<ModuleAccess>()
+            .HasIndex(m => new { m.TenantId, m.RoleId, m.Module })
+            .IsUnique();
+
+        modelBuilder.Entity<ModuleAccess>()
+            .HasOne(m => m.Tenant)
+            .WithMany()
+            .HasForeignKey(m => m.TenantId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<ModuleAccess>()
+            .HasOne(m => m.Role)
+            .WithMany()
+            .HasForeignKey(m => m.RoleId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         // Indexes
         modelBuilder.Entity<User>().HasIndex(u => u.Email).IsUnique();

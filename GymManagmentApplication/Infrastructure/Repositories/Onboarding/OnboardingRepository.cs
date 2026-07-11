@@ -1,48 +1,62 @@
-using System.Text.Json;
 using GymManagmentApplication.Domain.Entities.Platform;
+using GymManagmentApplication.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace GymManagmentApplication.Infrastructure.Repositories.Onboarding;
 
-public class OnboardingRepository : IOnboardingRepository
+public class OnboardingRepository(AppDbContext db) : IOnboardingRepository
 {
-    private static readonly List<OnboardingStep> _steps = [];
-    private static readonly List<ClientAssessment> _assessments = [];
-    private static readonly List<AssessmentTemplate> _templates = [];
-    private static ulong _stepId = 1;
-    private static ulong _assessId = 1;
-    private static ulong _tmplId = 1;
+    public async Task<List<OnboardingStep>> GetStepsByMemberAsync(ulong memberId) =>
+        await db.OnboardingSteps
+            .Where(s => s.TenantId == memberId)
+            .OrderBy(s => s.SortOrder)
+            .ToListAsync();
 
-    public Task<List<OnboardingStep>> GetStepsByMemberAsync(ulong memberId) =>
-        Task.FromResult(_steps.Where(s => s.TenantId == memberId).ToList());
-
-    public Task<List<OnboardingStep>> CreateStepsAsync(List<OnboardingStep> steps)
+    public async Task<List<OnboardingStep>> CreateStepsAsync(List<OnboardingStep> steps)
     {
-        foreach (var s in steps) { s.Id = _stepId++; }
-        _steps.AddRange(steps);
-        return Task.FromResult(steps);
+        var maxId = await db.OnboardingSteps.MaxAsync(s => (ulong?)s.Id) ?? 0;
+        foreach (var step in steps)
+            step.Id = ++maxId;
+
+        db.OnboardingSteps.AddRange(steps);
+        await db.SaveChangesAsync();
+        return steps;
     }
 
-    public Task<OnboardingStep?> GetStepAsync(ulong memberId, string stepKey) =>
-        Task.FromResult(_steps.FirstOrDefault(s => s.TenantId == memberId && s.StepKey == stepKey));
+    public async Task<OnboardingStep?> GetStepAsync(ulong memberId, string stepKey) =>
+        await db.OnboardingSteps
+            .FirstOrDefaultAsync(s => s.TenantId == memberId && s.StepKey == stepKey);
 
-    public Task<OnboardingStep> UpdateStepAsync(OnboardingStep step) => Task.FromResult(step);
-
-    public Task<ClientAssessment> CreateAssessmentAsync(ClientAssessment assessment)
+    public async Task<OnboardingStep> UpdateStepAsync(OnboardingStep step)
     {
-        assessment.Id = _assessId++;
+        db.OnboardingSteps.Update(step);
+        await db.SaveChangesAsync();
+        return step;
+    }
+
+    public async Task<ClientAssessment> CreateAssessmentAsync(ClientAssessment assessment)
+    {
+        var maxId = await db.ClientAssessments.MaxAsync(a => (ulong?)a.Id) ?? 0;
+        assessment.Id         = maxId + 1;
         assessment.AssessedAt = DateTime.UtcNow;
-        _assessments.Add(assessment);
-        return Task.FromResult(assessment);
+        db.ClientAssessments.Add(assessment);
+        await db.SaveChangesAsync();
+        return assessment;
     }
 
-    public Task<List<AssessmentTemplate>> GetTemplatesAsync(ulong tenantId) =>
-        Task.FromResult(_templates.Where(t => t.TenantId == tenantId).ToList());
+    public async Task<List<AssessmentTemplate>> GetTemplatesAsync(ulong tenantId) =>
+        await db.AssessmentTemplates
+            .Where(t => t.TenantId == tenantId && t.IsActive)
+            .OrderBy(t => t.Name)
+            .ToListAsync();
 
-    public Task<AssessmentTemplate> CreateTemplateAsync(AssessmentTemplate template)
+    public async Task<AssessmentTemplate> CreateTemplateAsync(AssessmentTemplate template)
     {
-        template.Id = _tmplId++;
+        var maxId = await db.AssessmentTemplates.MaxAsync(t => (ulong?)t.Id) ?? 0;
+        template.Id        = maxId + 1;
         template.CreatedAt = DateTime.UtcNow;
-        _templates.Add(template);
-        return Task.FromResult(template);
+        db.AssessmentTemplates.Add(template);
+        await db.SaveChangesAsync();
+        return template;
     }
 }

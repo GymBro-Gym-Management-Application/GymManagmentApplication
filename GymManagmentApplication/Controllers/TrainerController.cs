@@ -9,16 +9,16 @@ namespace GymManagmentApplication.Controllers;
 
 [ApiController]
 [Route("api/trainers")]
-//[AuthorizeRoles("admin", "trainer", "client")]
+[AuthorizeRoles("admin", "trainer", "client")]
 public class TrainerController(ITrainerService service, IValidator<CreateTrainerRequest> validator) : ControllerBase
 {
     [HttpGet]
-    //[AuthorizeRoles("admin", "trainer", "client")]
+    [AuthorizeRoles("admin", "trainer", "client")]
     public async Task<ActionResult<ApiResponse<object>>> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20)
         => Ok(ApiResponse<object>.Ok(await service.GetAllAsync(pageNumber, pageSize)));
 
     [HttpPost]
-    //[AuthorizeRoles("admin")]
+    [AuthorizeRoles("admin")]
     public async Task<ActionResult<ApiResponse<object>>> Create([FromBody] CreateTrainerRequest request)
     {
         var v = await validator.ValidateAsync(request);

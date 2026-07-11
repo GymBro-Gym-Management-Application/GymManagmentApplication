@@ -1,22 +1,26 @@
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
+using GymManagmentApplication.Application.Auth.Interfaces;
+using GymManagmentApplication.Application.Auth.Requests;
 using GymManagmentApplication.Application.Common;
 using GymManagmentApplication.Application.Member.Interfaces;
 using GymManagmentApplication.Application.Member.Requests;
 using GymManagmentApplication.Application.Member.Responses;
+using GymManagmentApplication.Application.Trainer.Interfaces;
+using GymManagmentApplication.Application.Trainer.Requests;
 using GymManagmentApplication.Domain.Entities.Identity;
+using GymManagmentApplication.Domain.Entities.Platform;
 using GymManagmentApplication.Domain.Enums;
+using GymManagmentApplication.Infrastructure.Data;
 using GymManagmentApplication.Infrastructure.Repositories.Member;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace GymManagmentApplication.Application.Member.Services;
 
-public class MemberService(IMemberRepository repository) : IMemberService
+public class MemberService(IMemberRepository repository, ITrainerService trainerService, IAuthService authService, AppDbContext db) : IMemberService
 {
-    // In-memory stores for notes, documents, tags (replace with DB repositories as needed)
-    private static readonly List<(ulong MemberId, MemberNoteResponse Note)> _notes = [];
-    private static readonly List<(ulong MemberId, MemberDocumentResponse Doc)> _documents = [];
-    private static readonly Dictionary<ulong, List<string>> _tags = [];
-    private static ulong _noteId = 1;
-    private static ulong _docId = 1;
 
     public async Task<PagedResponse<MemberResponse>> GetAllAsync(MemberSearchRequest request)
     {
@@ -32,23 +36,60 @@ public class MemberService(IMemberRepository repository) : IMemberService
 
     public async Task<MemberResponse> CreateAsync(CreateMemberRequest request)
     {
-        var user = new User
+        // Capitalise first letter of first name and build default password: John@123
+        var firstName = string.IsNullOrWhiteSpace(request.FirstName)
+            ? "Member"
+            : char.ToUpper(request.FirstName[0]) + request.FirstName[1..].ToLower();
+
+        var defaultPassword = $"{firstName}@123";
+
+        // Register through AuthService so the User row is created with a
+        // proper hashed password, resolved TenantId, and 'client' role.
+        var authResult = await authService.RegisterAsync(new RegisterRequest
         {
-            TenantId = request.TenantId,
-            Email = request.Email,
-            FirstName = request.FirstName,
-            LastName = request.LastName,
-            Phone = request.Phone,
-            Gender = Enum.TryParse<UserGender>(request.Gender, true, out var g) ? g : null,
-            Dob = request.Dob,
-            AvatarUrl = request.AvatarUrl,
-            PasswordHash = string.Empty,
-            Uuid = Guid.NewGuid().ToString(),
-            RoleId = 0,
-            Status = UserStatus.Active
-        };
-        var created = await repository.CreateAsync(user);
-        return Map(created);
+            Email     = request.Email,
+            Password  = defaultPassword,
+            FirstName = firstName,
+            LastName  = request.LastName ?? string.Empty,
+            Role      = "client",
+            TenantId  = request.TenantId
+        });
+
+        // authResult is null only when email already exists
+        if (authResult is null)
+            throw new InvalidOperationException($"Email '{request.Email}' is already registered.");
+
+        // Fetch the newly created User to fill remaining profile fields
+        var created = await repository.GetByEmailAsync(request.Email)
+                      ?? throw new InvalidOperationException("User was registered but could not be retrieved.");
+
+        // Patch profile fields that RegisterRequest doesn't cover
+        if (request.Phone is not null)     created.Phone = request.Phone;
+        if (request.Dob.HasValue)          created.Dob = request.Dob;
+        if (request.AvatarUrl is not null) created.AvatarUrl = request.AvatarUrl;
+        if (request.Notes is not null)     created.Notes = request.Notes;
+        if (request.Gender is not null && Enum.TryParse<UserGender>(request.Gender, true, out var g))
+            created.Gender = g;
+        created.Status = UserStatus.Active;
+        await repository.UpdateAsync(created);
+
+        var response = Map(created);
+        response.DefaultPassword = defaultPassword; // surface once so admin can share it
+
+        // Optionally assign to a trainer immediately
+        if (request.TrainerId.HasValue)
+        {
+            await trainerService.AssignClientAsync(request.TrainerId.Value, new AssignClientRequest
+            {
+                ClientId = created.Id,
+                BranchId = request.BranchId ?? 0,
+                Notes    = "Assigned during member creation"
+            });
+            response.TrainerId = request.TrainerId;
+            response.BranchId  = request.BranchId;
+        }
+
+        return response;
     }
 
     public async Task<MemberResponse?> GetByIdAsync(ulong id)
@@ -101,42 +142,127 @@ public class MemberService(IMemberRepository repository) : IMemberService
         return url;
     }
 
-    public Task<List<MemberNoteResponse>> GetNotesAsync(ulong id) =>
-        Task.FromResult(_notes.Where(n => n.MemberId == id).Select(n => n.Note).ToList());
-
-    public Task<MemberNoteResponse> AddNoteAsync(ulong id, AddMemberNoteRequest request)
+    public async Task<List<MemberNoteResponse>> GetNotesAsync(ulong id)
     {
-        var note = new MemberNoteResponse { Id = _noteId++, Note = request.Note, TrainerId = request.TrainerId, CreatedAt = DateTime.UtcNow };
-        _notes.Add((id, note));
-        return Task.FromResult(note);
+        var notes = await db.AuditLogs
+            .Where(a => a.EntityType == "MemberNote" && a.EntityId == id)
+            .OrderByDescending(a => a.CreatedAt)
+            .ToListAsync();
+
+        return notes.Select(a => new MemberNoteResponse
+        {
+            Id = a.Id,
+            Note = a.NewValues != null
+                ? a.NewValues.RootElement.GetProperty("note").GetString() ?? string.Empty
+                : string.Empty,
+            TrainerId =(ulong) a.UserId,
+            CreatedAt = a.CreatedAt
+        }).ToList();
     }
 
-    public Task<List<MemberDocumentResponse>> GetDocumentsAsync(ulong id) =>
-        Task.FromResult(_documents.Where(d => d.MemberId == id).Select(d => d.Doc).ToList());
-
-    public Task<MemberDocumentResponse> UploadDocumentAsync(ulong id, IFormFile file, string? documentType)
+    public async Task<MemberNoteResponse> AddNoteAsync(ulong id, AddMemberNoteRequest request)
     {
-        var doc = new MemberDocumentResponse
+        var maxId = await db.AuditLogs.MaxAsync(a => (ulong?)a.Id) ?? 0;
+        var entry = new AuditLog
         {
-            Id = _docId++,
-            FileName = file.FileName,
-            Url = $"/uploads/members/{id}/docs/{file.FileName}",
-            DocumentType = documentType,
-            UploadedAt = DateTime.UtcNow
+            Id = maxId + 1,
+            EntityType = "MemberNote",
+            EntityId = id,
+            Action = "create",
+            UserId = request.TrainerId,
+            NewValues = JsonDocument.Parse(JsonSerializer.Serialize(new { note = request.Note })),
+            CreatedAt = DateTime.UtcNow
         };
-        _documents.Add((id, doc));
-        return Task.FromResult(doc);
+        db.AuditLogs.Add(entry);
+        await db.SaveChangesAsync();
+
+        return new MemberNoteResponse { Id = entry.Id, Note = request.Note, TrainerId = request.TrainerId, CreatedAt = entry.CreatedAt };
+    }
+
+    public async Task<List<MemberDocumentResponse>> GetDocumentsAsync(ulong id)
+    {
+        var docs = await db.MediaLibraries
+            .Where(m => m.UploadedBy == id || (m.Tags != null && EF.Functions.Like(m.Tags.RootElement.ToString(), $"%memberId:{id}%")))
+            .OrderByDescending(m => m.CreatedAt)
+            .ToListAsync();
+
+        return docs.Select(m => new MemberDocumentResponse
+        {
+            Id = m.Id,
+            FileName = m.Name,
+            Url = m.FileUrl,
+            DocumentType = m.FileType,
+            UploadedAt = m.CreatedAt
+        }).ToList();
+    }
+
+    public async Task<MemberDocumentResponse> UploadDocumentAsync(ulong id, IFormFile file, string? documentType)
+    {
+        var tenantId = (await db.Users.FindAsync(id))?.TenantId ?? 0;
+        var maxId = await db.MediaLibraries.MaxAsync(m => (ulong?)m.Id) ?? 0;
+        var url = $"/uploads/members/{id}/docs/{file.FileName}";
+
+        var media = new MediaLibrary
+        {
+            Id = maxId + 1,
+            TenantId = tenantId,
+            UploadedBy = id,
+            Name = file.FileName,
+            FileUrl = url,
+            FileType = documentType,
+            MimeType = file.ContentType,
+            FileSize = (uint)file.Length,
+            Tags = JsonDocument.Parse(JsonSerializer.Serialize(new { memberId = id, documentType })),
+            CreatedAt = DateTime.UtcNow
+        };
+        db.MediaLibraries.Add(media);
+        await db.SaveChangesAsync();
+
+        return new MemberDocumentResponse
+        {
+            Id = media.Id, FileName = media.Name,
+            Url = media.FileUrl, DocumentType = documentType,
+            UploadedAt = media.CreatedAt
+        };
     }
 
     public Task<PagedResponse<MemberResponse>> SearchAsync(MemberSearchRequest request) => GetAllAsync(request);
 
-    public Task<List<string>> GetTagsAsync(ulong id) =>
-        Task.FromResult(_tags.TryGetValue(id, out var t) ? t : []);
-
-    public Task<bool> AssignTagsAsync(ulong id, AssignTagsRequest request)
+    public async Task<List<string>> GetTagsAsync(ulong id)
     {
-        _tags[id] = request.Tags;
-        return Task.FromResult(true);
+        return await db.Taggables
+            .Where(t => t.TaggableType == "User" && t.TaggableId == id)
+            .Include(t => t.Tag)
+            .Select(t => t.Tag.Name)
+            .ToListAsync();
+    }
+
+    public async Task<bool> AssignTagsAsync(ulong id, AssignTagsRequest request)
+    {
+        // Remove existing tags for this member
+        var existing = await db.Taggables
+            .Where(t => t.TaggableType == "User" && t.TaggableId == id)
+            .ToListAsync();
+        db.Taggables.RemoveRange(existing);
+
+        var tenantId = (await db.Users.FindAsync(id))?.TenantId ?? 0;
+
+        foreach (var tagName in request.Tags)
+        {
+            // Get or create the tag
+            var tag = await db.Tags.FirstOrDefaultAsync(t => t.TenantId == tenantId && t.Name == tagName);
+            if (tag is null)
+            {
+                var maxTagId = await db.Tags.MaxAsync(t => (ulong?)t.Id) ?? 0;
+                tag = new Tag { Id = maxTagId + 1, TenantId = tenantId, Name = tagName };
+                db.Tags.Add(tag);
+                await db.SaveChangesAsync();
+            }
+            db.Taggables.Add(new Taggable { TagId = tag.Id, TaggableId = id, TaggableType = "User" });
+        }
+
+        await db.SaveChangesAsync();
+        return true;
     }
 
     private static MemberResponse Map(User u) => new()

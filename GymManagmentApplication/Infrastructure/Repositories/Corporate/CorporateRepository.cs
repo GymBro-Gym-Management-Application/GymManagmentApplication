@@ -1,53 +1,70 @@
 using GymManagmentApplication.Domain.Entities.Membership;
 using GymManagmentApplication.Domain.Enums;
+using GymManagmentApplication.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace GymManagmentApplication.Infrastructure.Repositories.Corporate;
 
-public class CorporateRepository : ICorporateRepository
+public class CorporateRepository(AppDbContext db) : ICorporateRepository
 {
-    private static readonly List<CorporateAccount> _accounts = [];
-    private static readonly List<GymMembership> _memberships = [];
-    private static ulong _nextId = 1;
-    private static ulong _memId = 1;
-
-    public Task<(List<CorporateAccount> Items, int Total)> GetAllAsync(int pageNumber, int pageSize)
+    public async Task<(List<CorporateAccount> Items, int Total)> GetAllAsync(int pageNumber, int pageSize)
     {
-        var total = _accounts.Count;
-        var items = _accounts.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
-        return Task.FromResult((items, total));
+        var total = await db.CorporateAccounts.CountAsync();
+        var items = await db.CorporateAccounts
+            .OrderBy(a => a.Name)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+        return (items, total);
     }
 
-    public Task<CorporateAccount> CreateAsync(CorporateAccount account)
+    public async Task<CorporateAccount> CreateAsync(CorporateAccount account)
     {
-        account.Id = _nextId++;
+        var maxId = await db.CorporateAccounts.MaxAsync(a => (ulong?)a.Id) ?? 0;
+        account.Id        = maxId + 1;
         account.CreatedAt = DateTime.UtcNow;
-        _accounts.Add(account);
-        return Task.FromResult(account);
+        db.CorporateAccounts.Add(account);
+        await db.SaveChangesAsync();
+        return account;
     }
 
-    public Task<CorporateAccount?> GetByIdAsync(ulong id) =>
-        Task.FromResult(_accounts.FirstOrDefault(a => a.Id == id));
+    public async Task<CorporateAccount?> GetByIdAsync(ulong id) =>
+        await db.CorporateAccounts.FindAsync(id);
 
-    public Task<CorporateAccount> UpdateAsync(CorporateAccount account) => Task.FromResult(account);
-
-    public Task<List<GymMembership>> GetMembershipsAsync(ulong corporateId) =>
-        Task.FromResult(_memberships.Where(m => m.CorporateId == corporateId && m.Status != MembershipStatus.Cancelled).ToList());
-
-    public Task<GymMembership> AddMembershipAsync(GymMembership membership)
+    public async Task<CorporateAccount> UpdateAsync(CorporateAccount account)
     {
-        membership.Id = _memId++;
+        account.UpdatedAt = DateTime.UtcNow;
+        db.CorporateAccounts.Update(account);
+        await db.SaveChangesAsync();
+        return account;
+    }
+
+    public async Task<List<GymMembership>> GetMembershipsAsync(ulong corporateId) =>
+        await db.GymMemberships
+            .Include(m => m.Plan)
+            .Where(m => m.CorporateId == corporateId && m.Status != MembershipStatus.Cancelled)
+            .ToListAsync();
+
+    public async Task<GymMembership> AddMembershipAsync(GymMembership membership)
+    {
+        var maxId = await db.GymMemberships.MaxAsync(m => (ulong?)m.Id) ?? 0;
+        membership.Id        = maxId + 1;
         membership.CreatedAt = DateTime.UtcNow;
         membership.UpdatedAt = DateTime.UtcNow;
-        _memberships.Add(membership);
-        return Task.FromResult(membership);
+        db.GymMemberships.Add(membership);
+        await db.SaveChangesAsync();
+        return membership;
     }
 
-    public Task<bool> RemoveMembershipAsync(ulong corporateId, ulong userId)
+    public async Task<bool> RemoveMembershipAsync(ulong corporateId, ulong userId)
     {
-        var m = _memberships.FirstOrDefault(x => x.CorporateId == corporateId && x.UserId == userId && x.Status != MembershipStatus.Cancelled);
-        if (m is null) return Task.FromResult(false);
-        m.Status = MembershipStatus.Cancelled;
+        var m = await db.GymMemberships.FirstOrDefaultAsync(x =>
+            x.CorporateId == corporateId && x.UserId == userId &&
+            x.Status != MembershipStatus.Cancelled);
+        if (m is null) return false;
+        m.Status      = MembershipStatus.Cancelled;
         m.CancelledAt = DateTime.UtcNow;
-        return Task.FromResult(true);
+        await db.SaveChangesAsync();
+        return true;
     }
 }

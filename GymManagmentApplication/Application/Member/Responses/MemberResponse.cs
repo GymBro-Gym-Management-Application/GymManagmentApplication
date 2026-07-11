@@ -14,4 +14,11 @@ public class MemberResponse
     public string Status { get; set; } = default!;
     public string? Notes { get; set; }
     public DateTime CreatedAt { get; set; }
+
+    // Trainer assignment (populated when assigned on creation or via GET)
+    public ulong? TrainerId { get; set; }
+    public ulong? BranchId { get; set; }
+
+    /// <summary>Only populated on the creation response so the admin can share the initial password.</summary>
+    public string? DefaultPassword { get; set; }
 }

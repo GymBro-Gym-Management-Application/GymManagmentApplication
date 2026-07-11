@@ -1,51 +1,70 @@
 using GymManagmentApplication.Application.Member.Requests;
 using GymManagmentApplication.Domain.Entities.Identity;
 using GymManagmentApplication.Domain.Enums;
+using GymManagmentApplication.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace GymManagmentApplication.Infrastructure.Repositories.Member;
 
-public class MemberRepository : IMemberRepository
+public class MemberRepository(AppDbContext db) : IMemberRepository
 {
-    private static readonly List<User> _store = [];
-    private static ulong _nextId = 1;
-
-    public Task<(List<User> Items, int Total)> GetAllAsync(MemberSearchRequest request)
+    public async Task<(List<User> Items, int Total)> GetAllAsync(MemberSearchRequest request)
     {
-        var query = _store.Where(u => u.DeletedAt == null);
-        if (!string.IsNullOrWhiteSpace(request.Status) && Enum.TryParse<UserStatus>(request.Status, true, out var status))
-            query = query.Where(u => u.Status == status);
+        var q = db.Users.Where(u => u.DeletedAt == null && u.Role != null && u.Role.Slug == "client");
+
+        if (!string.IsNullOrWhiteSpace(request.Status) &&
+            Enum.TryParse<UserStatus>(request.Status, true, out var status))
+            q = q.Where(u => u.Status == status);
+
         if (!string.IsNullOrWhiteSpace(request.Query))
-            query = query.Where(u => u.FirstName.Contains(request.Query, StringComparison.OrdinalIgnoreCase)
-                                  || u.LastName.Contains(request.Query, StringComparison.OrdinalIgnoreCase)
-                                  || u.Email.Contains(request.Query, StringComparison.OrdinalIgnoreCase));
-        var total = query.Count();
-        var items = query.Skip((request.PageNumber - 1) * request.PageSize).Take(request.PageSize).ToList();
-        return Task.FromResult((items, total));
+            q = q.Where(u =>
+                (u.FirstName != null && u.FirstName.Contains(request.Query)) ||
+                (u.LastName  != null && u.LastName.Contains(request.Query))  ||
+                (u.Email     != null && u.Email.Contains(request.Query)));
+
+        var total = await q.CountAsync();
+        var items = await q
+            .OrderBy(u => u.FirstName)
+            .Skip((request.PageNumber - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .ToListAsync();
+
+        return (items, total);
     }
 
-    public Task<User> CreateAsync(User user)
+    public async Task<User> CreateAsync(User user)
     {
-        user.Id = _nextId++;
+        var maxId = await db.Users.MaxAsync(u => (ulong?)u.Id) ?? 0;
+        user.Id        = maxId + 1;
         user.CreatedAt = DateTime.UtcNow;
         user.UpdatedAt = DateTime.UtcNow;
-        _store.Add(user);
-        return Task.FromResult(user);
+        db.Users.Add(user);
+        await db.SaveChangesAsync();
+        return user;
     }
 
-    public Task<User?> GetByIdAsync(ulong id) =>
-        Task.FromResult(_store.FirstOrDefault(u => u.Id == id && u.DeletedAt == null));
+    public async Task<User?> GetByIdAsync(ulong id) =>
+        await db.Users.FirstOrDefaultAsync(u => u.Id == id && u.DeletedAt == null);
 
-    public Task<User?> UpdateAsync(User user)
+    public async Task<User?> GetByEmailAsync(string email) =>
+        await db.Users.FirstOrDefaultAsync(u =>
+            u.Email != null && u.Email.ToLower() == email.ToLower() && u.DeletedAt == null);
+
+    public async Task<User?> UpdateAsync(User user)
     {
         user.UpdatedAt = DateTime.UtcNow;
-        return Task.FromResult<User?>(user);
+        db.Users.Update(user);
+        await db.SaveChangesAsync();
+        return user;
     }
 
-    public Task<bool> SoftDeleteAsync(ulong id)
+    public async Task<bool> SoftDeleteAsync(ulong id)
     {
-        var user = _store.FirstOrDefault(u => u.Id == id && u.DeletedAt == null);
-        if (user is null) return Task.FromResult(false);
+        var user = await db.Users.FindAsync(id);
+        if (user is null || user.DeletedAt != null) return false;
         user.DeletedAt = DateTime.UtcNow;
-        return Task.FromResult(true);
+        user.UpdatedAt = DateTime.UtcNow;
+        await db.SaveChangesAsync();
+        return true;
     }
 }

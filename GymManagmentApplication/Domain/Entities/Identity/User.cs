@@ -26,6 +26,7 @@ public class User : BaseEntity
     public string? BiometricHash { get; set; }
     public string PreferredLanguage { get; set; } = "en";
     public JsonDocument? NotificationPrefs { get; set; }
+    public string? Notes { get; set; }
     public JsonDocument? CustomFields { get; set; }
     public DateTime? DeletedAt { get; set; }
 

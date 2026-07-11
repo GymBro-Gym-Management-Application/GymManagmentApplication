@@ -12,6 +12,7 @@ using GymManagmentApplication.Application.WorkoutPlan.Services;
 using GymManagmentApplication.Application.WorkoutPlan.Validators;
 using GymManagmentApplication.Application.WorkoutBuilder.Interfaces;
 using GymManagmentApplication.Application.WorkoutBuilder.Services;
+using GymManagmentApplication.Application.WorkoutBuilder.Validators;
 using GymManagmentApplication.Application.WorkoutAutomation.Interfaces;
 using GymManagmentApplication.Application.WorkoutAutomation.Services;
 using GymManagmentApplication.Application.WorkoutAutomation.Validators;
@@ -19,6 +20,7 @@ using GymManagmentApplication.Infrastructure.Repositories.Exercise;
 using GymManagmentApplication.Infrastructure.Repositories.Workout;
 using GymManagmentApplication.Infrastructure.Repositories.WorkoutPlan;
 using GymManagmentApplication.Infrastructure.Repositories.WorkoutAutomation;
+using GymManagmentApplication.Infrastructure.Repositories;
 using GymManagmentApplication.Application.Auth.Interfaces;
 using GymManagmentApplication.Application.Auth.Services;
 using GymManagmentApplication.Application.Auth.Validators;
@@ -52,9 +54,16 @@ using GymManagmentApplication.Application.Tenant.Validators;
 using GymManagmentApplication.Application.Trainer.Interfaces;
 using GymManagmentApplication.Application.Trainer.Services;
 using GymManagmentApplication.Application.Trainer.Validators;
+using GymManagmentApplication.Application.ModuleAccess.Interfaces;
+using GymManagmentApplication.Application.ModuleAccess.Services;
+using GymManagmentApplication.Application.ModuleAccess.Validators;
+using GymManagmentApplication.Application.Billing.Interfaces;
+using GymManagmentApplication.Application.Billing.Services;
+using GymManagmentApplication.Application.Billing.Validators;
+using GymManagmentApplication.Application.Dashboard.Interfaces;
+using GymManagmentApplication.Application.Dashboard.Services;
 using GymManagmentApplication.Infrastructure.Repositories.Branch;
 using GymManagmentApplication.Infrastructure.Repositories.Tenant;
-using GymManagmentApplication.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using GymManagmentApplication.Infrastructure.Repositories.Corporate;
 using GymManagmentApplication.Infrastructure.Repositories.Lead;
@@ -83,6 +92,9 @@ var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()!;
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        // Ensures short JWT claim names ("sub", "role", ...) are mapped to their
+        // long ClaimTypes.* equivalents, which is what controllers/AuthorizeRolesAttribute read.
+        options.MapInboundClaims = true;
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
@@ -147,6 +159,9 @@ builder.Services.AddValidatorsFromAssemblyContaining<CreateExerciseValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateWorkoutValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreatePlanValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateAutomationRuleValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<SetModuleAccessValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateMembershipPlanValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<AddCircuitValidator>();
 
 // Application Services
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -165,6 +180,13 @@ builder.Services.AddScoped<IWorkoutService, WorkoutService>();
 builder.Services.AddScoped<IWorkoutPlanService, WorkoutPlanService>();
 builder.Services.AddScoped<IWorkoutBuilderService, WorkoutBuilderService>();
 builder.Services.AddScoped<IWorkoutAutomationService, WorkoutAutomationService>();
+builder.Services.AddScoped<IModuleAccessService, ModuleAccessService>();
+builder.Services.AddScoped<IMembershipPlanService, MembershipPlanService>();
+builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IInvoiceService, InvoiceService>();
+builder.Services.AddScoped<IPricingService, PricingService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 // Infrastructure Repositories
 builder.Services.AddScoped<ITenantRepository, TenantRepository>();
@@ -195,7 +217,6 @@ app.UseSwaggerUI();
 
 app.UseCors("AllowAll");
 app.UseAuthentication();
-app.UseMiddleware<JwtMiddleware>();
 app.UseAuthorization();
 app.MapControllers();
 

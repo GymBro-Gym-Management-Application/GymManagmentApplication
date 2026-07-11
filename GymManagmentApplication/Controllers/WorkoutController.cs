@@ -20,6 +20,7 @@ public class WorkoutController(
     private ulong UserId => ulong.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "0");
 
     [HttpGet]
+    [AuthorizeRoles("admin", "trainer", "client")]
     public async Task<ActionResult<ApiResponse<object>>> List([FromQuery] WorkoutListRequest request)
         => Ok(ApiResponse<object>.Ok(await service.GetAllAsync(request)));
 
@@ -33,6 +34,7 @@ public class WorkoutController(
     }
 
     [HttpGet("{id:long}")]
+    [AuthorizeRoles("admin", "trainer", "client")]
     public async Task<ActionResult<ApiResponse<object>>> GetById(ulong id)
     {
         var result = await service.GetByIdAsync(id);

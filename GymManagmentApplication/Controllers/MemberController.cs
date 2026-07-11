@@ -18,7 +18,7 @@ public class MemberController(IMemberService service, IValidator<CreateMemberReq
         => Ok(ApiResponse<object>.Ok(await service.GetAllAsync(request)));
 
     [HttpPost]
-    [AuthorizeRoles("admin")]
+    [AuthorizeRoles("admin", "trainer", "client")]
     public async Task<ActionResult<ApiResponse<object>>> Create([FromBody] CreateMemberRequest request)
     {
         var v = await validator.ValidateAsync(request);

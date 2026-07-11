@@ -1,83 +1,96 @@
 using GymManagmentApplication.Application.Exercise.Requests;
+using GymManagmentApplication.Infrastructure.Data;
+using ExerciseEntity = GymManagmentApplication.Domain.Entities.Training.Exercise;
 using GymManagmentApplication.Domain.Entities.Training;
+using Microsoft.EntityFrameworkCore;
 
 namespace GymManagmentApplication.Infrastructure.Repositories.Exercise;
 
-public class ExerciseRepository : IExerciseRepository
+public class ExerciseRepository(AppDbContext db) : IExerciseRepository
 {
-    private static readonly List<Domain.Entities.Training.Exercise> _store = [];
-    private static readonly List<MuscleGroup> _muscles =
-    [
-        new() { Id = 1, Name = "Chest" }, new() { Id = 2, Name = "Back" },
-        new() { Id = 3, Name = "Shoulders" }, new() { Id = 4, Name = "Biceps" },
-        new() { Id = 5, Name = "Triceps" }, new() { Id = 6, Name = "Legs" },
-        new() { Id = 7, Name = "Core" }, new() { Id = 8, Name = "Glutes" },
-        new() { Id = 9, Name = "Calves" }, new() { Id = 10, Name = "Forearms" }
-    ];
-    private static readonly List<Domain.Entities.Training.Equipment> _equipment =
-    [
-        new() { Id = 1, Name = "Barbell" }, new() { Id = 2, Name = "Dumbbell" },
-        new() { Id = 3, Name = "Kettlebell" }, new() { Id = 4, Name = "Cable Machine" },
-        new() { Id = 5, Name = "Resistance Band" }, new() { Id = 6, Name = "Bodyweight" }
-    ];
-    private static ulong _id = 1;
-
-    public Task<(List<Domain.Entities.Training.Exercise> Items, int Total)> GetAllAsync(ExerciseListRequest request)
+    public async Task<(List<ExerciseEntity> Items, int Total)> GetAllAsync(ExerciseListRequest request)
     {
-        var q = _store.AsQueryable();
+        var q = db.Exercises.Where(e => e.IsActive);
+
         if (request.MuscleId.HasValue)
-            q = q.Where(e => e.ExerciseMuscles.Any(m => m.MuscleId == request.MuscleId));
+            q = q.Where(e => e.ExerciseMuscles.Any(m => m.MuscleId == request.MuscleId.Value));
+
         if (request.EquipmentId.HasValue)
-            q = q.Where(e => e.ExerciseEquipments.Any(eq => eq.EquipmentId == request.EquipmentId));
-        var total = q.Count();
-        var items = q.Skip((request.PageNumber - 1) * request.PageSize).Take(request.PageSize).ToList();
-        return Task.FromResult((items, total));
+            q = q.Where(e => e.ExerciseEquipments.Any(eq => eq.EquipmentId == request.EquipmentId.Value));
+
+        var total = await q.CountAsync();
+        var items = await q
+            .Include(e => e.ExerciseMuscles)
+            .Include(e => e.ExerciseEquipments)
+            .OrderBy(e => e.Name)
+            .Skip((request.PageNumber - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .ToListAsync();
+
+        return (items, total);
     }
 
-    public Task<Domain.Entities.Training.Exercise> CreateAsync(Domain.Entities.Training.Exercise exercise)
+    public async Task<ExerciseEntity> CreateAsync(ExerciseEntity exercise)
     {
-        exercise.Id = _id++;
+        var maxId = await db.Exercises.MaxAsync(e => (ulong?)e.Id) ?? 0;
+        exercise.Id        = maxId + 1;
         exercise.CreatedAt = DateTime.UtcNow;
-        _store.Add(exercise);
-        return Task.FromResult(exercise);
+        db.Exercises.Add(exercise);
+        await db.SaveChangesAsync();
+        return exercise;
     }
 
-    public Task<Domain.Entities.Training.Exercise?> GetByIdAsync(ulong id) =>
-        Task.FromResult(_store.FirstOrDefault(e => e.Id == id));
+    public async Task<ExerciseEntity?> GetByIdAsync(ulong id) =>
+        await db.Exercises
+            .Include(e => e.ExerciseMuscles)
+            .Include(e => e.ExerciseEquipments)
+            .FirstOrDefaultAsync(e => e.Id == id);
 
-    public Task<Domain.Entities.Training.Exercise?> UpdateAsync(Domain.Entities.Training.Exercise exercise)
+    public async Task<ExerciseEntity?> UpdateAsync(ExerciseEntity exercise)
     {
-        var idx = _store.FindIndex(e => e.Id == exercise.Id);
-        if (idx < 0) return Task.FromResult<Domain.Entities.Training.Exercise?>(null);
-        _store[idx] = exercise;
-        return Task.FromResult<Domain.Entities.Training.Exercise?>(exercise);
+        var existing = await db.Exercises.FindAsync(exercise.Id);
+        if (existing is null) return null;
+        exercise.UpdatedAt = DateTime.UtcNow;
+        db.Exercises.Update(exercise);
+        await db.SaveChangesAsync();
+        return exercise;
     }
 
-    public Task<bool> DeleteAsync(ulong id)
+    public async Task<bool> DeleteAsync(ulong id)
     {
-        var e = _store.FirstOrDefault(x => x.Id == id);
-        if (e is null) return Task.FromResult(false);
+        var e = await db.Exercises.FindAsync(id);
+        if (e is null) return false;
         e.IsActive = false;
-        return Task.FromResult(true);
+        await db.SaveChangesAsync();
+        return true;
     }
 
-    public Task<List<Domain.Entities.Training.Exercise>> GetAlternativesAsync(ulong id)
+    public async Task<List<ExerciseEntity>> GetAlternativesAsync(ulong id)
     {
-        var ex = _store.FirstOrDefault(e => e.Id == id);
-        if (ex is null) return Task.FromResult(new List<Domain.Entities.Training.Exercise>());
-        var alts = _store.Where(e => e.Id != id && e.Category == ex.Category && e.IsActive).Take(5).ToList();
-        return Task.FromResult(alts);
+        var ex = await db.Exercises.FindAsync(id);
+        if (ex is null) return [];
+        return await db.Exercises
+            .Where(e => e.Id != id && e.Category == ex.Category && e.IsActive)
+            .Take(5).ToListAsync();
     }
 
-    public Task<List<string>> GetAllTagsAsync()
+    public async Task<List<string>> GetAllTagsAsync()
     {
-        var tags = _store
-            .Where(e => e.Tags != null)
-            .SelectMany(e => e.Tags!.RootElement.EnumerateArray().Select(t => t.GetString() ?? ""))
-            .Distinct().OrderBy(t => t).ToList();
-        return Task.FromResult(tags);
+        var exercises = await db.Exercises
+            .Where(e => e.Tags != null && e.IsActive)
+            .Select(e => e.Tags)
+            .ToListAsync();
+
+        return exercises
+            .Where(t => t is not null)
+            .SelectMany(t => t!.RootElement.EnumerateArray().Select(v => v.GetString() ?? ""))
+            .Where(s => !string.IsNullOrWhiteSpace(s))
+            .Distinct().OrderBy(s => s).ToList();
     }
 
-    public Task<List<MuscleGroup>> GetAllMusclesAsync() => Task.FromResult(_muscles);
-    public Task<List<Domain.Entities.Training.Equipment>> GetAllEquipmentAsync() => Task.FromResult(_equipment);
+    public async Task<List<MuscleGroup>> GetAllMusclesAsync() =>
+        await db.MuscleGroups.OrderBy(m => m.Name).ToListAsync();
+
+    public async Task<List<Equipment>> GetAllEquipmentAsync() =>
+        await db.Equipment.OrderBy(e => e.Name).ToListAsync();
 }

@@ -28,3 +28,15 @@ public class AnnotateVideoValidator : AbstractValidator<AnnotateVideoRequest>
         RuleFor(x => x.Annotations).NotEmpty();
     }
 }
+
+public class ExerciseListValidator : AbstractValidator<ExerciseListRequest>
+{
+    public ExerciseListValidator()
+    {
+        RuleFor(x => x.Tag).MaximumLength(100);
+        RuleFor(x => x.MuscleId).GreaterThan((ushort)0).When(x => x.MuscleId.HasValue);
+        RuleFor(x => x.EquipmentId).GreaterThan((ushort)0).When(x => x.EquipmentId.HasValue);
+        RuleFor(x => x.PageNumber).GreaterThan(0);
+        RuleFor(x => x.PageSize).InclusiveBetween(1, 100);
+    }
+}

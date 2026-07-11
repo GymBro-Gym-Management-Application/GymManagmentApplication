@@ -14,6 +14,7 @@ public class CorporateAccount
     public uint? MaxMembers { get; set; }
     public CorporateStatus Status { get; set; } = CorporateStatus.Active;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? UpdatedAt { get; set; }
 
     public Core.Tenant Tenant { get; set; } = default!;
     public ICollection<GymMembership> Memberships { get; set; } = [];

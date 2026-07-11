@@ -31,3 +31,34 @@ public class AssignPlanValidator : AbstractValidator<AssignPlanRequest>
         RuleFor(x => x.StartDate).NotEmpty();
     }
 }
+
+public class PlanListValidator : AbstractValidator<PlanListRequest>
+{
+    public PlanListValidator()
+    {
+        RuleFor(x => x.TenantId).Must(id => id is null || id > 0)
+            .WithMessage("TenantId must be null or a valid id.");
+        RuleFor(x => x.Goal).IsInEnum().When(x => x.Goal.HasValue);
+        RuleFor(x => x.PageNumber).GreaterThan(0);
+        RuleFor(x => x.PageSize).InclusiveBetween(1, 100);
+    }
+}
+
+public class AddBranchValidator : AbstractValidator<AddBranchRequest>
+{
+    public AddBranchValidator()
+    {
+        RuleFor(x => x.Name).NotEmpty().MaximumLength(200);
+        RuleFor(x => x.Condition).NotNull();
+        RuleFor(x => x.NextPlanId).Must(id => id is null || id > 0)
+            .WithMessage("NextPlanId must be null or a valid plan id.");
+    }
+}
+
+public class UpdateProgressionValidator : AbstractValidator<UpdateProgressionRequest>
+{
+    public UpdateProgressionValidator()
+    {
+        RuleFor(x => x.Rules).NotNull();
+    }
+}

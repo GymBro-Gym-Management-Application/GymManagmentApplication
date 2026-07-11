@@ -3,105 +3,98 @@ using GymManagmentApplication.Application.WorkoutBuilder.Requests;
 using GymManagmentApplication.Application.WorkoutBuilder.Responses;
 using GymManagmentApplication.Domain.Entities.Training;
 using GymManagmentApplication.Domain.Enums;
+using GymManagmentApplication.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace GymManagmentApplication.Application.WorkoutBuilder.Services;
 
-public class WorkoutBuilderService : IWorkoutBuilderService
+public class WorkoutBuilderService(AppDbContext db) : IWorkoutBuilderService
 {
-    private static readonly List<WorkoutSection> _sections = [];
-    private static readonly Dictionary<string, object> _configs = [];
-    private static ulong _sectionId = 1;
-
-    public Task<SectionResponse> AddCircuitAsync(ulong workoutId, AddCircuitRequest request)
+    public async Task<SectionResponse> AddCircuitAsync(ulong workoutId, AddCircuitRequest request)
     {
-        var section = CreateSection(workoutId, request.Name ?? "Circuit", SectionType.Circuit, request.Rounds, request.RestSeconds);
-        return Task.FromResult(MapSection(section));
+        var section = await CreateSectionAsync(workoutId, request.Name ?? "Circuit",
+            SectionType.Circuit, request.Rounds, request.RestSeconds);
+        return MapSection(section);
     }
 
-    public Task<SectionResponse?> UpdateCircuitAsync(ulong workoutId, ulong circuitId, UpdateCircuitRequest request)
+    public async Task<SectionResponse?> UpdateCircuitAsync(ulong workoutId, ulong circuitId, UpdateCircuitRequest request)
     {
-        var section = _sections.FirstOrDefault(s => s.Id == circuitId && s.TemplateId == workoutId);
-        if (section is null) return Task.FromResult<SectionResponse?>(null);
+        var section = await db.WorkoutSections
+            .FirstOrDefaultAsync(s => s.Id == circuitId && s.TemplateId == workoutId);
+        if (section is null) return null;
+
         if (request.Name is not null) section.Name = request.Name;
         if (request.Rounds.HasValue) section.Rounds = request.Rounds.Value;
         if (request.RestSeconds.HasValue) section.RestSeconds = request.RestSeconds;
-        return Task.FromResult<SectionResponse?>(MapSection(section));
+        await db.SaveChangesAsync();
+        return MapSection(section);
     }
 
-    public Task<SectionResponse> AddSupersetAsync(ulong workoutId, AddSupersetRequest request)
+    public async Task<SectionResponse> AddSupersetAsync(ulong workoutId, AddSupersetRequest request)
     {
-        var section = CreateSection(workoutId, "Superset", SectionType.Superset, request.Sets, request.RestSeconds);
-        return Task.FromResult(MapSection(section));
+        var section = await CreateSectionAsync(workoutId, "Superset",
+            SectionType.Superset, request.Sets, request.RestSeconds);
+        return MapSection(section);
     }
 
-    public Task<SectionResponse> AddDropsetAsync(ulong workoutId, AddDropsetRequest request)
+    public async Task<SectionResponse> AddDropsetAsync(ulong workoutId, AddDropsetRequest request)
     {
-        var section = CreateSection(workoutId, "Dropset", SectionType.Dropset, 1, null);
-        return Task.FromResult(MapSection(section));
+        var section = await CreateSectionAsync(workoutId, "Dropset", SectionType.Dropset, 1, null);
+        return MapSection(section);
     }
 
-    public Task<SectionResponse> AddPyramidAsync(ulong workoutId, AddPyramidRequest request)
+    public async Task<SectionResponse> AddPyramidAsync(ulong workoutId, AddPyramidRequest request)
     {
-        var section = CreateSection(workoutId, $"Pyramid ({request.Direction})", SectionType.Pyramid, 1, null);
-        return Task.FromResult(MapSection(section));
+        var section = await CreateSectionAsync(workoutId,
+            $"Pyramid ({request.Direction})", SectionType.Pyramid, 1, null);
+        return MapSection(section);
     }
 
     public Task<BuilderConfigResponse> SetTempoAsync(ulong workoutId, SetTempoRequest request)
-    {
-        _configs[workoutId + ":tempo"] = request;
-        return Task.FromResult(BuildConfig(workoutId, "tempo", request));
-    }
+        => Task.FromResult(BuildConfig(workoutId, "tempo", request));
 
     public Task<BuilderConfigResponse> SetRestIntervalsAsync(ulong workoutId, SetRestIntervalsRequest request)
-    {
-        _configs[workoutId + ":rest"] = request;
-        return Task.FromResult(BuildConfig(workoutId, "rest-intervals", request));
-    }
+        => Task.FromResult(BuildConfig(workoutId, "rest-intervals", request));
 
     public Task<BuilderConfigResponse> ConfigureTimerAsync(ulong workoutId, ConfigureTimerRequest request)
-    {
-        _configs[workoutId + ":timer"] = request;
-        return Task.FromResult(BuildConfig(workoutId, "timer", request));
-    }
+        => Task.FromResult(BuildConfig(workoutId, "timer", request));
 
     public Task<BuilderConfigResponse> SetDifficultyAsync(ulong workoutId, SetDifficultyRequest request)
-    {
-        _configs[workoutId + ":difficulty"] = request;
-        return Task.FromResult(BuildConfig(workoutId, "difficulty", request));
-    }
+        => Task.FromResult(BuildConfig(workoutId, "difficulty", request));
 
-    private WorkoutSection CreateSection(ulong workoutId, string name, SectionType type, byte rounds, ushort? restSeconds)
+    // ── helpers ──────────────────────────────────────────────────────────────
+
+    private async Task<WorkoutSection> CreateSectionAsync(ulong workoutId, string name,
+        SectionType type, byte rounds, ushort? restSeconds)
     {
+        var sortOrder = (byte)await db.WorkoutSections.CountAsync(s => s.TemplateId == workoutId);
+        var maxId = await db.WorkoutSections.MaxAsync(s => (ulong?)s.Id) ?? 0;
+
         var section = new WorkoutSection
         {
-            Id = _sectionId++,
+            Id = maxId + 1,
             TemplateId = workoutId,
             Name = name,
             Type = type,
             Rounds = rounds,
             RestSeconds = restSeconds,
-            SortOrder = (byte)_sections.Count(s => s.TemplateId == workoutId)
+            SortOrder = sortOrder
         };
-        _sections.Add(section);
+        db.WorkoutSections.Add(section);
+        await db.SaveChangesAsync();
         return section;
     }
 
     private static SectionResponse MapSection(WorkoutSection s) => new()
     {
-        Id = s.Id,
-        WorkoutId = s.TemplateId,
-        Name = s.Name,
-        Type = s.Type.ToString(),
-        SortOrder = s.SortOrder,
-        Rounds = s.Rounds,
-        RestSeconds = s.RestSeconds
+        Id = s.Id, WorkoutId = s.TemplateId, Name = s.Name,
+        Type = s.Type.ToString(), SortOrder = s.SortOrder,
+        Rounds = s.Rounds, RestSeconds = s.RestSeconds
     };
 
     private static BuilderConfigResponse BuildConfig(ulong workoutId, string type, object config) => new()
     {
-        WorkoutId = workoutId,
-        ConfigType = type,
-        Config = config,
-        UpdatedAt = DateTime.UtcNow
+        WorkoutId = workoutId, ConfigType = type,
+        Config = config, UpdatedAt = DateTime.UtcNow
     };
 }

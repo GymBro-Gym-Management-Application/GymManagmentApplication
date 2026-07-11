@@ -1,66 +1,88 @@
 using GymManagmentApplication.Application.Workout.Requests;
 using GymManagmentApplication.Domain.Entities.Training;
+using GymManagmentApplication.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace GymManagmentApplication.Infrastructure.Repositories.Workout;
 
-public class WorkoutRepository : IWorkoutRepository
+public class WorkoutRepository(AppDbContext db) : IWorkoutRepository
 {
-    private static readonly List<WorkoutTemplate> _store = [];
-    private static readonly List<WorkoutAssignment> _assignments = [];
-    private static readonly List<WorkoutLog> _logs = [];
-    private static ulong _id = 1, _assignId = 1, _logId = 1;
-
-    public Task<(List<WorkoutTemplate> Items, int Total)> GetAllAsync(WorkoutListRequest request)
+    public async Task<(List<WorkoutTemplate> Items, int Total)> GetAllAsync(WorkoutListRequest request)
     {
-        var q = _store.AsQueryable();
-        if (request.Difficulty.HasValue) q = q.Where(w => w.Difficulty == request.Difficulty.Value);
-        if (!string.IsNullOrEmpty(request.Category)) q = q.Where(w => w.Category == request.Category);
-        var total = q.Count();
-        var items = q.Skip((request.PageNumber - 1) * request.PageSize).Take(request.PageSize).ToList();
-        return Task.FromResult((items, total));
+        var q = db.WorkoutTemplates.AsQueryable();
+
+        if (request.Difficulty.HasValue)
+            q = q.Where(w => w.Difficulty == request.Difficulty.Value);
+        if (!string.IsNullOrEmpty(request.Category))
+            q = q.Where(w => w.Category == request.Category);
+
+        var total = await q.CountAsync();
+        var items = await q
+            .OrderBy(w => w.Name)
+            .Skip((request.PageNumber - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .ToListAsync();
+
+        return (items, total);
     }
 
-    public Task<WorkoutTemplate> CreateAsync(WorkoutTemplate template)
+    public async Task<WorkoutTemplate> CreateAsync(WorkoutTemplate template)
     {
-        template.Id = _id++;
+        var maxId = await db.WorkoutTemplates.MaxAsync(w => (ulong?)w.Id) ?? 0;
+        template.Id        = maxId + 1;
         template.CreatedAt = DateTime.UtcNow;
-        _store.Add(template);
-        return Task.FromResult(template);
+        template.UpdatedAt = DateTime.UtcNow;
+        db.WorkoutTemplates.Add(template);
+        await db.SaveChangesAsync();
+        return template;
     }
 
-    public Task<WorkoutTemplate?> GetByIdAsync(ulong id) =>
-        Task.FromResult(_store.FirstOrDefault(w => w.Id == id));
+    public async Task<WorkoutTemplate?> GetByIdAsync(ulong id) =>
+        await db.WorkoutTemplates
+            .Include(w => w.Sections)
+            .FirstOrDefaultAsync(w => w.Id == id);
 
-    public Task<WorkoutTemplate?> UpdateAsync(WorkoutTemplate template)
+    public async Task<WorkoutTemplate?> UpdateAsync(WorkoutTemplate template)
     {
-        var idx = _store.FindIndex(w => w.Id == template.Id);
-        if (idx < 0) return Task.FromResult<WorkoutTemplate?>(null);
-        _store[idx] = template;
-        return Task.FromResult<WorkoutTemplate?>(template);
+        var existing = await db.WorkoutTemplates.FindAsync(template.Id);
+        if (existing is null) return null;
+        template.UpdatedAt = DateTime.UtcNow;
+        db.WorkoutTemplates.Update(template);
+        await db.SaveChangesAsync();
+        return template;
     }
 
-    public Task<bool> DeleteAsync(ulong id)
+    public async Task<bool> DeleteAsync(ulong id)
     {
-        var w = _store.FirstOrDefault(x => x.Id == id);
-        if (w is null) return Task.FromResult(false);
-        _store.Remove(w);
-        return Task.FromResult(true);
+        var w = await db.WorkoutTemplates.FindAsync(id);
+        if (w is null) return false;
+        db.WorkoutTemplates.Remove(w);
+        await db.SaveChangesAsync();
+        return true;
     }
 
-    public Task<WorkoutAssignment> CreateAssignmentAsync(WorkoutAssignment assignment)
+    public async Task<WorkoutAssignment> CreateAssignmentAsync(WorkoutAssignment assignment)
     {
-        assignment.Id = _assignId++;
-        _assignments.Add(assignment);
-        return Task.FromResult(assignment);
+        var maxId = await db.WorkoutAssignments.MaxAsync(a => (ulong?)a.Id) ?? 0;
+        assignment.Id = maxId + 1;
+        db.WorkoutAssignments.Add(assignment);
+        await db.SaveChangesAsync();
+        return assignment;
     }
 
-    public Task<WorkoutLog> CreateLogAsync(WorkoutLog log)
+    public async Task<WorkoutLog> CreateLogAsync(WorkoutLog log)
     {
-        log.Id = _logId++;
-        _logs.Add(log);
-        return Task.FromResult(log);
+        var maxId = await db.WorkoutLogs.MaxAsync(l => (ulong?)l.Id) ?? 0;
+        log.Id        = maxId + 1;
+        log.CreatedAt = DateTime.UtcNow;
+        db.WorkoutLogs.Add(log);
+        await db.SaveChangesAsync();
+        return log;
     }
 
-    public Task<List<WorkoutLog>> GetLogsByWorkoutAndClientAsync(ulong workoutId, ulong clientId) =>
-        Task.FromResult(_logs.Where(l => l.TemplateId == workoutId && l.ClientId == clientId).ToList());
+    public async Task<List<WorkoutLog>> GetLogsByWorkoutAndClientAsync(ulong workoutId, ulong clientId) =>
+        await db.WorkoutLogs
+            .Where(l => l.TemplateId == workoutId && l.ClientId == clientId)
+            .OrderByDescending(l => l.CreatedAt)
+            .ToListAsync();
 }

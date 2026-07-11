@@ -25,7 +25,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.AI.AiChatMessage", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Content")
@@ -54,7 +53,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.AI.AiChatSession", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Context")
@@ -88,7 +86,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.AI.MlPrediction", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal?>("Confidence")
@@ -132,7 +129,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.AI.PoseLog", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<DateTime>("CapturedAt")
@@ -171,7 +167,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Analytics.AnalyticsDaily", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<int?>("AvgSessionMin")
@@ -227,7 +222,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Analytics.TrainerAnalyticsDaily", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal?>("AvgRating")
@@ -263,7 +257,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Automation.AutomationLog", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal?>("EntityId")
@@ -294,7 +287,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Automation.AutomationRule", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Actions")
@@ -340,7 +332,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Automation.ScheduledTask", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<byte>("Attempts")
@@ -376,7 +367,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Billing.Coupon", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("ApplicableTo")
@@ -444,7 +434,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Billing.CouponRedemption", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal>("CouponId")
@@ -482,7 +471,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Billing.Invoice", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -548,7 +536,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Billing.Payment", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal>("Amount")
@@ -597,7 +584,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Billing.PaymentGateway", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("ConfigEnc")
@@ -627,7 +613,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.CRM.Lead", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<byte?>("AiScore")
@@ -696,7 +681,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.CRM.LeadActivity", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -732,7 +716,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.CRM.Referral", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Code")
@@ -782,7 +765,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.CRM.ReferralProgram", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<DateTime?>("EndsAt")
@@ -823,7 +805,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Communication.Campaign", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Audience")
@@ -873,7 +854,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Communication.CommunicationLog", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Body")
@@ -929,7 +909,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Communication.FeedbackResponse", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Responses")
@@ -964,7 +943,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Communication.FeedbackSurvey", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -1000,7 +978,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Communication.Notification", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Body")
@@ -1046,7 +1023,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Communication.NotificationTemplate", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Body")
@@ -1089,7 +1065,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Communication.Webhook", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -1128,7 +1103,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Communication.WebhookDelivery", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<byte>("Attempt")
@@ -1174,7 +1148,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Core.Branch", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Address")
@@ -1254,7 +1227,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Core.Tenant", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -1319,7 +1291,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Core.TenantSetting", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -1348,7 +1319,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Facility.AccessDevice", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal>("BranchId")
@@ -1384,7 +1354,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Facility.AccessEvent", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal?>("Confidence")
@@ -1418,7 +1387,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Facility.EquipmentBooking", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -1456,7 +1424,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Facility.EquipmentMaintenanceLog", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal?>("Cost")
@@ -1499,7 +1466,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Facility.FacilityEquipment", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal>("BranchId")
@@ -1562,7 +1528,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Facility.Locker", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal>("BranchId")
@@ -1593,7 +1558,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Facility.LockerAssignment", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<DateTime>("AssignedAt")
@@ -1628,7 +1592,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Gamification.Achievement", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Criteria")
@@ -1667,7 +1630,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Gamification.Challenge", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal?>("CreatedBy")
@@ -1718,7 +1680,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Gamification.ChallengeParticipant", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal>("ChallengeId")
@@ -1754,7 +1715,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Gamification.UserAchievement", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal>("AchievementId")
@@ -1783,7 +1743,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.HR.PayrollConfig", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal>("BaseSalary")
@@ -1827,7 +1786,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.HR.PayrollPeriod", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<DateOnly>("PeriodEnd")
@@ -1855,7 +1813,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.HR.PayrollSlip", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal>("BaseSalary")
@@ -1917,7 +1874,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Health.ClientGoal", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal>("ClientId")
@@ -1971,7 +1927,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Health.ClientProfile", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Allergies")
@@ -2029,7 +1984,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Health.HabitLog", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<bool>("Completed")
@@ -2059,7 +2013,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Health.HabitTracker", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal>("ClientId")
@@ -2096,7 +2049,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Health.HealthMetric", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<int?>("BloodPressureDia")
@@ -2172,7 +2124,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Health.InjuryRecord", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<bool>("AiDetected")
@@ -2232,7 +2183,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Health.TransformationJournal", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal>("ClientId")
@@ -2271,7 +2221,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Health.WearableDevice", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("AccessTokenEnc")
@@ -2311,10 +2260,58 @@ namespace GymManagmentApplication.Migrations
                     b.ToTable("WearableDevices");
                 });
 
+            modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Identity.ModuleAccess", b =>
+                {
+                    b.Property<decimal>("Id")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<bool>("CanCreate")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("CanDelete")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("CanEdit")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("CanExport")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("CanView")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Module")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("RoleId")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<decimal>("TenantId")
+                        .HasColumnType("numeric(20,0)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.HasIndex("TenantId", "RoleId", "Module")
+                        .IsUnique();
+
+                    b.ToTable("ModuleAccesses");
+                });
+
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Identity.Permission", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Action")
@@ -2336,7 +2333,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Identity.Role", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -2384,7 +2380,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Identity.SsoProvider", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("ClientId")
@@ -2418,7 +2413,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Identity.User", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("AvatarUrl")
@@ -2465,6 +2459,9 @@ namespace GymManagmentApplication.Migrations
 
                     b.Property<long>("LoginCount")
                         .HasColumnType("bigint");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text");
 
                     b.Property<string>("NotificationPrefs")
                         .HasColumnType("jsonb");
@@ -2517,7 +2514,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Identity.UserSession", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -2552,7 +2548,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Membership.CorporateAccount", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("BillingInfo")
@@ -2580,6 +2575,9 @@ namespace GymManagmentApplication.Migrations
                     b.Property<decimal>("TenantId")
                         .HasColumnType("numeric(20,0)");
 
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.HasKey("Id");
 
                     b.HasIndex("TenantId");
@@ -2590,7 +2588,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Membership.GymMembership", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<bool>("AutoRenew")
@@ -2656,7 +2653,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Membership.MembershipPlan", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<int>("BillingCycle")
@@ -2716,7 +2712,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Nutrition.DietPlan", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<int?>("CaloriesTarget")
@@ -2785,7 +2780,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Nutrition.FoodItem", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Barcode")
@@ -2832,7 +2826,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Nutrition.NutritionLog", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<int?>("Calories")
@@ -2885,7 +2878,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.POS.PosOrder", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal?>("BranchId")
@@ -2939,7 +2931,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.POS.PosOrderItem", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal>("LineTotal")
@@ -2980,7 +2971,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.POS.PosProduct", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal?>("BranchId")
@@ -3036,7 +3026,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Platform.ApiKey", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -3085,7 +3074,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Platform.AssessmentTemplate", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -3121,7 +3109,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Platform.AuditLog", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Action")
@@ -3164,7 +3151,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Platform.ClientAssessment", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<DateTime>("AssessedAt")
@@ -3207,7 +3193,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Platform.CustomFieldDefinition", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("EntityType")
@@ -3247,7 +3232,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Platform.CustomPage", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Content")
@@ -3292,7 +3276,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Platform.ExportJob", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<DateTime?>("CompletedAt")
@@ -3342,7 +3325,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Platform.FeatureFlag", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Description")
@@ -3366,7 +3348,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Platform.MediaLibrary", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -3425,7 +3406,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Platform.NavigationMenu", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<bool>("IsActive")
@@ -3459,7 +3439,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Platform.OnboardingStep", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<DateTime?>("DoneAt")
@@ -3495,7 +3474,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Platform.Plugin", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Author")
@@ -3529,7 +3507,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Platform.PricingRule", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<int>("AppliesTo")
@@ -3584,7 +3561,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Platform.Rating", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -3624,7 +3600,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Platform.SearchIndexCache", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Embedding")
@@ -3655,7 +3630,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Platform.SocialPost", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Content")
@@ -3697,7 +3671,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Platform.SupportTicket", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<bool>("AiRouted")
@@ -3748,7 +3721,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Platform.SupportTicketReply", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Attachments")
@@ -3782,7 +3754,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Platform.Tag", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Color")
@@ -3825,7 +3796,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Platform.TenantFeatureOverride", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("FeatureKey")
@@ -3851,7 +3821,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Platform.TenantPlugin", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Config")
@@ -3881,7 +3850,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Platform.UiTheme", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -3934,7 +3902,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Platform.VirtualSession", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal>("ClientId")
@@ -3992,7 +3959,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Scheduling.Attendance", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal>("BranchId")
@@ -4033,7 +3999,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Scheduling.ClassBooking", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<DateTime>("BookedAt")
@@ -4063,7 +4028,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Scheduling.ClassType", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Color")
@@ -4101,7 +4065,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Scheduling.GymClass", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal>("BranchId")
@@ -4185,7 +4148,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Training.Exercise", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<int>("Category")
@@ -4306,7 +4268,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Training.PtSession", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal?>("BranchId")
@@ -4368,7 +4329,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Training.PtSessionType", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Currency")
@@ -4410,7 +4370,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Training.TrainerAvailabilitySlot", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<byte>("DayOfWeek")
@@ -4438,7 +4397,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Training.TrainerClientAssignment", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<DateTime>("AssignedAt")
@@ -4476,7 +4434,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Training.TrainerProfile", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Address")
@@ -4591,7 +4548,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Training.TrainerTimeOff", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal?>("ApprovedBy")
@@ -4630,7 +4586,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Training.WorkoutAssignment", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<DateOnly>("AssignedAt")
@@ -4676,7 +4631,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Training.WorkoutAutomationLog", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<DateTime>("ExecutedAt")
@@ -4704,7 +4658,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Training.WorkoutAutomationRule", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Actions")
@@ -4750,7 +4703,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Training.WorkoutExercise", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<bool>("AiSubstitutionOk")
@@ -4804,7 +4756,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Training.WorkoutLog", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal?>("AssignmentId")
@@ -4867,7 +4818,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Training.WorkoutLogSet", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal?>("DistanceM")
@@ -4911,7 +4861,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Training.WorkoutPlan", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -4966,7 +4915,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Training.WorkoutPlanAssignment", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<decimal>("ClientId")
@@ -4999,7 +4947,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Training.WorkoutPlanBranch", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Condition")
@@ -5031,7 +4978,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Training.WorkoutPlanDay", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<byte>("DayNumber")
@@ -5058,7 +5004,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Training.WorkoutPlanWeek", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Notes")
@@ -5080,7 +5025,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Training.WorkoutProgression", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Condition")
@@ -5108,7 +5052,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Training.WorkoutSection", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("Name")
@@ -5139,7 +5082,6 @@ namespace GymManagmentApplication.Migrations
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Training.WorkoutTemplate", b =>
                 {
                     b.Property<decimal>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("BranchingRules")
@@ -6023,6 +5965,25 @@ namespace GymManagmentApplication.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Client");
+                });
+
+            modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Identity.ModuleAccess", b =>
+                {
+                    b.HasOne("GymManagmentApplication.Domain.Entities.Identity.Role", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GymManagmentApplication.Domain.Entities.Core.Tenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Role");
+
+                    b.Navigation("Tenant");
                 });
 
             modelBuilder.Entity("GymManagmentApplication.Domain.Entities.Identity.Role", b =>

@@ -1,105 +1,163 @@
 using GymManagmentApplication.Application.Roles.Interfaces;
 using GymManagmentApplication.Application.Roles.Requests;
 using GymManagmentApplication.Application.Roles.Responses;
+using GymManagmentApplication.Domain.Entities.Identity;
+using GymManagmentApplication.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace GymManagmentApplication.Application.Roles.Services;
 
-public class RolesService : IRolesService
+public class RolesService(AppDbContext db) : IRolesService
 {
-    private static readonly List<RoleResponse> _roles =
-    [
-        new() { Id = "1", Name = "admin",   Description = "Full system access",   Permissions = ["members.read","members.write","trainers.read","trainers.write","roles.manage"], CreatedAt = DateTime.UtcNow },
-        new() { Id = "2", Name = "trainer", Description = "Trainer access",        Permissions = ["members.read","trainers.read","trainers.write"], CreatedAt = DateTime.UtcNow },
-        new() { Id = "3", Name = "client",  Description = "Member/client access",  Permissions = ["members.read"], CreatedAt = DateTime.UtcNow },
-    ];
-
-    private static readonly List<PermissionResponse> _permissions =
-    [
-        new() { Key = "members.read",    Group = "Members",  Description = "View members" },
-        new() { Key = "members.write",   Group = "Members",  Description = "Create/update members" },
-        new() { Key = "members.delete",  Group = "Members",  Description = "Delete members" },
-        new() { Key = "trainers.read",   Group = "Trainers", Description = "View trainers" },
-        new() { Key = "trainers.write",  Group = "Trainers", Description = "Create/update trainers" },
-        new() { Key = "trainers.delete", Group = "Trainers", Description = "Delete trainers" },
-        new() { Key = "leads.read",      Group = "CRM",      Description = "View leads" },
-        new() { Key = "leads.write",     Group = "CRM",      Description = "Create/update leads" },
-        new() { Key = "roles.manage",    Group = "Roles",    Description = "Manage roles and permissions" },
-        new() { Key = "reports.read",    Group = "Reports",  Description = "View reports and analytics" },
-    ];
-
-    // userId -> list of roleIds
-    private static readonly Dictionary<ulong, List<string>> _userRoles = new()
+    public async Task<List<RoleResponse>> GetAllRolesAsync()
     {
-        [1] = ["1"],
-        [2] = ["2"],
-        [3] = ["3"],
-    };
-
-    private static int _nextId = 4;
-
-    public Task<List<RoleResponse>> GetAllRolesAsync() => Task.FromResult(_roles.ToList());
-
-    public Task<RoleResponse> CreateRoleAsync(CreateRoleRequest request)
-    {
-        var role = new RoleResponse { Id = (_nextId++).ToString(), Name = request.Name, Description = request.Description, Permissions = [], CreatedAt = DateTime.UtcNow };
-        _roles.Add(role);
-        return Task.FromResult(role);
+        var roles = await db.Roles.Include(r => r.RolePermissions).ThenInclude(rp => rp.Permission).ToListAsync();
+        return roles.Select(Map).ToList();
     }
 
-    public Task<RoleResponse?> GetRoleByIdAsync(string id) =>
-        Task.FromResult(_roles.FirstOrDefault(r => r.Id == id));
-
-    public Task<RoleResponse?> UpdateRoleAsync(string id, UpdateRoleRequest request)
+    public async Task<RoleResponse> CreateRoleAsync(CreateRoleRequest request)
     {
-        var role = _roles.FirstOrDefault(r => r.Id == id);
-        if (role is null) return Task.FromResult<RoleResponse?>(null);
-        if (request.Name is not null) role.Name = request.Name;
-        if (request.Description is not null) role.Description = request.Description;
-        return Task.FromResult<RoleResponse?>(role);
-    }
-
-    public Task<bool> DeleteRoleAsync(string id)
-    {
-        var role = _roles.FirstOrDefault(r => r.Id == id);
-        if (role is null) return Task.FromResult(false);
-        _roles.Remove(role);
-        return Task.FromResult(true);
-    }
-
-    public Task<List<string>> GetRolePermissionsAsync(string id)
-    {
-        var role = _roles.FirstOrDefault(r => r.Id == id);
-        return Task.FromResult(role?.Permissions ?? []);
-    }
-
-    public Task<RoleResponse?> UpdateRolePermissionsAsync(string id, UpdateRolePermissionsRequest request)
-    {
-        var role = _roles.FirstOrDefault(r => r.Id == id);
-        if (role is null) return Task.FromResult<RoleResponse?>(null);
-        role.Permissions = request.Permissions;
-        return Task.FromResult<RoleResponse?>(role);
-    }
-
-    public Task<List<PermissionResponse>> GetAllPermissionsAsync() => Task.FromResult(_permissions.ToList());
-
-    public Task<PermissionMatrixResponse> GetPermissionMatrixAsync() =>
-        Task.FromResult(new PermissionMatrixResponse
+        var maxId = await db.Roles.MaxAsync(r => (ulong?)r.Id) ?? 0;
+        var tenantId = await db.Tenants.OrderBy(t => t.Id).Select(t => t.Id).FirstOrDefaultAsync();
+        var role = new Role
         {
-            Matrix = _roles.Select(r => new RolePermissionRow { RoleName = r.Name, Permissions = r.Permissions }).ToList()
-        });
-
-    public Task<bool> AssignRoleToUserAsync(ulong userId, AssignRoleRequest request)
-    {
-        if (!_roles.Any(r => r.Id == request.RoleId)) return Task.FromResult(false);
-        if (!_userRoles.TryGetValue(userId, out var roles))
-            _userRoles[userId] = roles = [];
-        if (!roles.Contains(request.RoleId)) roles.Add(request.RoleId);
-        return Task.FromResult(true);
+            Id = maxId + 1, TenantId = tenantId,
+            Name = request.Name,
+            Slug = request.Name.ToLower().Replace(" ", "-"),
+            Description = request.Description,
+            IsSystem = false, CreatedAt = DateTime.UtcNow
+        };
+        db.Roles.Add(role);
+        await db.SaveChangesAsync();
+        return Map(role);
     }
 
-    public Task<bool> RevokeRoleFromUserAsync(ulong userId, string roleId)
+    public async Task<RoleResponse?> GetRoleByIdAsync(string id)
     {
-        if (!_userRoles.TryGetValue(userId, out var roles)) return Task.FromResult(false);
-        return Task.FromResult(roles.Remove(roleId));
+        if (!ulong.TryParse(id, out var uid)) return null;
+        var role = await db.Roles.Include(r => r.RolePermissions)
+            .ThenInclude(rp => rp.Permission)
+            .FirstOrDefaultAsync(r => r.Id == uid);
+        return role is null ? null : Map(role);
     }
+
+    public async Task<RoleResponse?> UpdateRoleAsync(string id, UpdateRoleRequest request)
+    {
+        if (!ulong.TryParse(id, out var uid)) return null;
+        var role = await db.Roles.FindAsync(uid);
+        if (role is null) return null;
+        if (request.Name is not null) { role.Name = request.Name; role.Slug = request.Name.ToLower().Replace(" ", "-"); }
+        if (request.Description is not null) role.Description = request.Description;
+        await db.SaveChangesAsync();
+        return Map(role);
+    }
+
+    public async Task<bool> DeleteRoleAsync(string id)
+    {
+        if (!ulong.TryParse(id, out var uid)) return false;
+        var role = await db.Roles.FindAsync(uid);
+        if (role is null || role.IsSystem) return false;
+        db.Roles.Remove(role);
+        await db.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<List<string>> GetRolePermissionsAsync(string id)
+    {
+        if (!ulong.TryParse(id, out var uid)) return [];
+        return await db.RolePermissions
+            .Where(rp => rp.RoleId == uid)
+            .Include(rp => rp.Permission)
+            .Select(rp => $"{rp.Permission.Module}.{rp.Permission.Action}")
+            .ToListAsync();
+    }
+
+    public async Task<RoleResponse?> UpdateRolePermissionsAsync(string id, UpdateRolePermissionsRequest request)
+    {
+        if (!ulong.TryParse(id, out var uid)) return null;
+        var role = await db.Roles.FindAsync(uid);
+        if (role is null) return null;
+
+        // Remove existing
+        var existing = await db.RolePermissions.Where(rp => rp.RoleId == uid).ToListAsync();
+        db.RolePermissions.RemoveRange(existing);
+
+        // Add new — resolve permission by "module.action" key
+        foreach (var key in request.Permissions)
+        {
+            var parts = key.Split('.', 2);
+            if (parts.Length < 2) continue;
+            var perm = await db.Permissions
+                .FirstOrDefaultAsync(p => p.Module == parts[0] && p.Action == parts[1]);
+            if (perm is not null)
+                db.RolePermissions.Add(new RolePermission { RoleId = uid, PermissionId = perm.Id });
+        }
+
+        await db.SaveChangesAsync();
+        await db.Entry(role).Collection(r => r.RolePermissions).LoadAsync();
+        return Map(role);
+    }
+
+    public async Task<List<PermissionResponse>> GetAllPermissionsAsync()
+    {
+        var perms = await db.Permissions.OrderBy(p => p.Module).ThenBy(p => p.Action).ToListAsync();
+        return perms.Select(p => new PermissionResponse
+        {
+            Key = $"{p.Module}.{p.Action}",
+            Group = p.Module,
+            Description = p.Label ?? $"{p.Action} {p.Module}"
+        }).ToList();
+    }
+
+    public async Task<PermissionMatrixResponse> GetPermissionMatrixAsync()
+    {
+        var roles = await db.Roles
+            .Include(r => r.RolePermissions).ThenInclude(rp => rp.Permission)
+            .ToListAsync();
+        return new PermissionMatrixResponse
+        {
+            Matrix = roles.Select(r => new RolePermissionRow
+            {
+                RoleName = r.Name,
+                Permissions = r.RolePermissions
+                    .Select(rp => $"{rp.Permission.Module}.{rp.Permission.Action}").ToList()
+            }).ToList()
+        };
+    }
+
+    public async Task<bool> AssignRoleToUserAsync(ulong userId, AssignRoleRequest request)
+    {
+        if (!ulong.TryParse(request.RoleId, out var roleId)) return false;
+        var role = await db.Roles.FindAsync(roleId);
+        if (role is null) return false;
+        var user = await db.Users.FindAsync(userId);
+        if (user is null) return false;
+        user.RoleId    = roleId;
+        user.UpdatedAt = DateTime.UtcNow;
+        await db.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> RevokeRoleFromUserAsync(ulong userId, string roleId)
+    {
+        if (!ulong.TryParse(roleId, out var rid)) return false;
+        var user = await db.Users.FindAsync(userId);
+        if (user is null || user.RoleId != rid) return false;
+        // Revert to default client role
+        var clientRole = await db.Roles.FirstOrDefaultAsync(r => r.Slug == "client");
+        user.RoleId    = clientRole?.Id ?? 0;
+        user.UpdatedAt = DateTime.UtcNow;
+        await db.SaveChangesAsync();
+        return true;
+    }
+
+    private static RoleResponse Map(Role r) => new()
+    {
+        Id = r.Id.ToString(), Name = r.Name, Description = r.Description,
+        Permissions = r.RolePermissions
+            .Select(rp => $"{rp.Permission?.Module}.{rp.Permission?.Action}")
+            .Where(s => !s.StartsWith('.'))
+            .ToList(),
+        CreatedAt = r.CreatedAt
+    };
 }

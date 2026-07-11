@@ -1,0 +1,16 @@
+using GymManagmentApplication.Application.Common;
+using GymManagmentApplication.Application.Dashboard.Interfaces;
+using GymManagmentApplication.Filters;
+using Microsoft.AspNetCore.Mvc;
+
+namespace GymManagmentApplication.Controllers;
+
+[ApiController]
+[Route("api/dashboard")]
+[AuthorizeRoles("admin")]
+public class DashboardController(IDashboardService service) : ControllerBase
+{
+    [HttpGet("overview")]
+    public async Task<ActionResult<ApiResponse<object>>> GetOverview()
+        => Ok(ApiResponse<object>.Ok(await service.GetOverviewAsync()));
+}

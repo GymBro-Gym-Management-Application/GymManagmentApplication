@@ -55,6 +55,8 @@ public class TrainerRepository(AppDbContext db) : ITrainerRepository
 
     public async Task<TrainerClientAssignment> AddClientAssignmentAsync(TrainerClientAssignment assignment)
     {
+        var maxId = await db.TrainerClientAssignments.MaxAsync(a => (ulong?)a.Id) ?? 0;
+        assignment.Id = maxId + 1;
         assignment.AssignedAt = DateTime.UtcNow;
         db.TrainerClientAssignments.Add(assignment);
         await db.SaveChangesAsync();
