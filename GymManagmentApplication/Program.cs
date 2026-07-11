@@ -217,10 +217,14 @@ builder.Services.AddScoped<IWorkoutAutomationRepository, WorkoutAutomationReposi
 
 var app = builder.Build();
 
-// Seed default Tenant + Roles on startup
+// Apply any pending EF Core migrations, then seed default Tenant + Roles, on startup.
+// Migrations are additive/idempotent (tracked via __EFMigrationsHistory), so this is
+// safe to run on every boot - it's what actually gets new tables like Modules/
+// UserModuleAccesses created on the deployed database, since nothing else does.
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await db.Database.MigrateAsync();
     await DbSeeder.SeedAsync(db);
 }
 
