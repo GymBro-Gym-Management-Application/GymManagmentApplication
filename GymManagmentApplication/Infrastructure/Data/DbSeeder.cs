@@ -65,12 +65,17 @@ public static class DbSeeder
         }
 
         // ── Feature modules (per-user gate-able areas) ──────────────────────────
+        // Split into finer-grained toggles than the original 4 — each maps to a
+        // narrower slice of functionality so access can be tuned per person.
         var seedModules = new[]
         {
-            ("workouts",  "Workouts",              "Exercise library and workout training", "activity"),
-            ("plans",     "Plans & Progress",       "Assigned training plans and progress tracking", "book-open"),
-            ("community", "Community & Challenges", "Live coaches and community challenges", "users"),
-            ("stats",     "Stats",                  "Daily health metrics and streaks", "bar-chart-2"),
+            ("workouts",      "Workouts",         "Browsing and completing assigned workouts", "activity"),
+            ("exercises",     "Exercise Library",  "Exercise library browsing and management", "zap"),
+            ("plans",         "Plans & Progress",  "Assigned training plans and progress tracking", "book-open"),
+            ("challenges",    "Challenges",        "Community challenges and leaderboards", "award"),
+            ("live-coaching", "Live Coaching",     "Live coach discovery and booking", "video"),
+            ("stats",         "Stats",             "Daily health metrics and streaks", "bar-chart-2"),
+            ("ai-coach",      "AI Coach",          "AI-generated recovery and training tips", "cpu"),
         };
 
         foreach (var (key, name, desc, icon) in seedModules)
@@ -88,6 +93,18 @@ public static class DbSeeder
                 Icon        = icon,
                 CreatedAt   = DateTime.UtcNow
             });
+            await db.SaveChangesAsync();
+        }
+
+        // Prune modules from an earlier, coarser seed list that this split replaces.
+        var currentKeys = seedModules.Select(m => m.Item1).ToArray();
+        var staleModules = await db.Modules.Where(m => !currentKeys.Contains(m.Key)).ToListAsync();
+        if (staleModules.Count > 0)
+        {
+            var staleIds = staleModules.Select(m => m.Id).ToList();
+            var staleAccess = await db.UserModuleAccesses.Where(a => staleIds.Contains(a.ModuleId)).ToListAsync();
+            db.UserModuleAccesses.RemoveRange(staleAccess);
+            db.Modules.RemoveRange(staleModules);
             await db.SaveChangesAsync();
         }
     }

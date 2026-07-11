@@ -8,7 +8,7 @@ namespace GymManagmentApplication.Controllers;
 
 [ApiController]
 [Route("api/challenges")]
-[RequireModule("community")]
+[RequireModule("challenges")]
 public class ChallengesController(IChallengesService service) : ControllerBase
 {
     private ulong UserId => ulong.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "0");
