@@ -36,6 +36,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<ModuleAccess> ModuleAccesses => Set<ModuleAccess>();
     public DbSet<UserSession> UserSessions => Set<UserSession>();
     public DbSet<SsoProvider> SsoProviders => Set<SsoProvider>();
+    public DbSet<Module> Modules => Set<Module>();
+    public DbSet<UserModuleAccess> UserModuleAccesses => Set<UserModuleAccess>();
 
     // Membership
     public DbSet<MembershipPlan> MembershipPlans => Set<MembershipPlan>();

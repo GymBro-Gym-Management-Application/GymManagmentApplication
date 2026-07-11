@@ -63,6 +63,33 @@ public static class DbSeeder
             });
             await db.SaveChangesAsync();
         }
+
+        // ── Feature modules (per-user gate-able areas) ──────────────────────────
+        var seedModules = new[]
+        {
+            ("workouts",  "Workouts",              "Exercise library and workout training", "activity"),
+            ("plans",     "Plans & Progress",       "Assigned training plans and progress tracking", "book-open"),
+            ("community", "Community & Challenges", "Live coaches and community challenges", "users"),
+            ("stats",     "Stats",                  "Daily health metrics and streaks", "bar-chart-2"),
+        };
+
+        foreach (var (key, name, desc, icon) in seedModules)
+        {
+            if (await db.Modules.AnyAsync(m => m.Key == key))
+                continue;
+
+            var moduleId = await GetNextIdAsync(db, "Modules");
+            db.Modules.Add(new Module
+            {
+                Id          = moduleId,
+                Key         = key,
+                Name        = name,
+                Description = desc,
+                Icon        = icon,
+                CreatedAt   = DateTime.UtcNow
+            });
+            await db.SaveChangesAsync();
+        }
     }
 
     /// <summary>

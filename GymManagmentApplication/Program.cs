@@ -62,6 +62,12 @@ using GymManagmentApplication.Application.Billing.Services;
 using GymManagmentApplication.Application.Billing.Validators;
 using GymManagmentApplication.Application.Dashboard.Interfaces;
 using GymManagmentApplication.Application.Dashboard.Services;
+using GymManagmentApplication.Application.Health.Interfaces;
+using GymManagmentApplication.Application.Health.Services;
+using GymManagmentApplication.Application.Challenges.Interfaces;
+using GymManagmentApplication.Application.Challenges.Services;
+using GymManagmentApplication.Application.UserModules.Interfaces;
+using GymManagmentApplication.Application.UserModules.Services;
 using GymManagmentApplication.Infrastructure.Repositories.Branch;
 using GymManagmentApplication.Infrastructure.Repositories.Tenant;
 using Microsoft.EntityFrameworkCore;
@@ -187,6 +193,9 @@ builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 builder.Services.AddScoped<IPricingService, PricingService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IHealthService, HealthService>();
+builder.Services.AddScoped<IChallengesService, ChallengesService>();
+builder.Services.AddScoped<IUserModulesService, UserModulesService>();
 
 // Infrastructure Repositories
 builder.Services.AddScoped<ITenantRepository, TenantRepository>();

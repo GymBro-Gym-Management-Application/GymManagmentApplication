@@ -10,6 +10,7 @@ namespace GymManagmentApplication.Controllers;
 
 [ApiController]
 [Route("api/workouts")]
+[RequireModule("workouts")]
 public class WorkoutController(
     IWorkoutService service,
     IValidator<CreateWorkoutRequest> createValidator,

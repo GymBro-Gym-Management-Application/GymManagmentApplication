@@ -2,13 +2,14 @@ using FluentValidation;
 using GymManagmentApplication.Application.Common;
 using GymManagmentApplication.Application.ModuleAccess.Interfaces;
 using GymManagmentApplication.Application.ModuleAccess.Requests;
+using GymManagmentApplication.Filters;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GymManagmentApplication.Controllers;
 
 [ApiController]
 [Route("api/module-access")]
-//[AuthorizeRoles("admin")]
+[AuthorizeRoles("admin")]
 public class ModuleAccessController(
     IModuleAccessService service,
     IValidator<SetModuleAccessRequest> setValidator,
